@@ -1,0 +1,291 @@
+﻿unit Vendas;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.ComCtrls, Vcl.Grids,
+  Vcl.DBGrids, Vcl.StdCtrls, Vcl.ExtCtrls, Banco;
+
+type
+  TTelaVendas = class(TForm)
+    PnlFundo: TPanel;
+    PnlDivisao: TPanel;
+    PnlCupom: TPanel;
+    PnlTotalVendas: TPanel;
+    LbData: TLabel;
+    LbNomeCliente: TLabel;
+    LbNumVenda: TLabel;
+    EdNomeCliente: TEdit;
+    EdNumVenda: TEdit;
+    EdVlrUnit: TEdit;
+    EdQuantidade: TEdit;
+    EdProduto: TEdit;
+    EdDescItem: TEdit;
+    EdVlrTotalItem: TEdit;
+    LbProduto: TLabel;
+    LbQuantidade: TLabel;
+    LbVlrUnit: TLabel;
+    LbDescItem: TLabel;
+    LbVlrTotalItem: TLabel;
+    BtnSelecionar: TButton;
+    BtnAdicionar: TButton;
+    BtnLimpar: TButton;
+    BtnFinalizar: TButton;
+    LbCupom: TLabel;
+    GridVendas: TDBGrid;
+    EdTotalVenda: TEdit;
+    EdTotalVendas: TLabel;
+    DTPData: TDateTimePicker;
+
+    procedure FormCreate(Sender: TObject);
+    procedure BtnAdicionarClick(Sender: TObject);
+    procedure BtnLimparClick(Sender: TObject);
+    procedure BtnFinalizarClick(Sender: TObject);
+    procedure EdNomeClienteKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure EdProdutoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure GridVendasDblClick(Sender: TObject);
+
+    procedure BloquearFocoEdit(Sender: TObject);
+    procedure BloquearCliqueEdit(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+  private
+    procedure CalcularTotalItem;
+    procedure AtualizarTotalVenda;
+    function ValidarItem: Boolean;
+    procedure GerarVendaInicial;
+    procedure AtualizarStatusFinalizar;
+    procedure CarregarItens;
+
+  public
+  end;
+
+var
+  TelaVendas: TTelaVendas;
+
+implementation
+
+{$R *.dfm}
+
+uses PesqClientes, PesqProdutos;
+
+procedure TTelaVendas.FormCreate(Sender: TObject);
+begin
+  DTPData.Date := Date;
+  EdTotalVenda.Text := '0,00';
+  BtnFinalizar.Enabled := False;
+end;
+
+procedure TTelaVendas.GerarVendaInicial;
+begin
+  with DataModule1.QryVendas do
+  begin
+    Close;
+    SQL.Text := 'SELECT COALESCE(MAX(ID),0)+1 AS PROXIMO FROM VENDAS';
+    Open;
+    EdNumVenda.Text := FieldByName('PROXIMO').AsString;
+
+    // INSERE A VENDA INICIAL (provisória)
+    Close;
+    SQL.Text := 'INSERT INTO VENDAS (ID, DATA, CLIENTE, TOTAL) ' +
+                'VALUES (:ID, :DATA, :CLI, :TOTAL)';
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text, 0);
+    ParamByName('DATA').AsDate := DTPData.Date;
+    ParamByName('CLI').AsString := EdNomeCliente.Text;
+    ParamByName('TOTAL').AsFloat := 0; // Total zerado inicialmente
+    ExecSQL;
+  end;
+end;
+procedure TTelaVendas.CarregarItens;
+begin
+  with DataModule1.QryItensVenda do
+  begin
+    Close;
+    SQL.Text :=
+      'SELECT ID, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL ' +
+      'FROM ITENS_VENDA WHERE NUM_VENDA = :ID';
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text,0);
+    Open;
+  end;
+
+  GridVendas.DataSource := nil;
+  GridVendas.DataSource := TDataSource.Create(Self);
+  GridVendas.DataSource.DataSet := DataModule1.QryItensVenda;
+end;
+
+procedure TTelaVendas.CalcularTotalItem;
+var
+  Qtd: Integer;
+  VlrUnit, Desc, Total: Double;
+begin
+  Qtd := StrToIntDef(EdQuantidade.Text, 0);
+  VlrUnit := StrToFloatDef(EdVlrUnit.Text, 0);
+  Desc := StrToFloatDef(EdDescItem.Text, 0);
+
+  Total := Qtd * (VlrUnit - Desc);
+
+  EdVlrTotalItem.Text := FormatFloat('0.00', Total);
+end;
+
+
+function TTelaVendas.ValidarItem: Boolean;
+begin
+  Result := False;
+
+  if Trim(EdNomeCliente.Text) = '' then
+  begin
+    ShowMessage('Selecione um cliente.');
+    Exit;
+  end;
+
+  if Trim(EdProduto.Text) = '' then
+  begin
+    ShowMessage('Selecione um produto.');
+    Exit;
+  end;
+
+  if StrToIntDef(EdQuantidade.Text, 0) <= 0 then
+  begin
+    ShowMessage('Quantidade deve ser maior que zero.');
+    Exit;
+  end;
+
+  Result := True;
+end;
+
+procedure TTelaVendas.BtnAdicionarClick(Sender: TObject);
+begin
+  if not ValidarItem then Exit;
+
+  if Trim(EdNumVenda.Text) = '' then
+    GerarVendaInicial;
+
+  CalcularTotalItem;
+
+  // insere item no banco apenas se já existe número de venda
+  with DataModule1.QryItensVenda do
+  begin
+    Close;
+    SQL.Text :=
+      'INSERT INTO ITENS_VENDA (NUM_VENDA, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL) ' +
+      'VALUES (:ID, :PROD, :QTD, :UNIT, :DESC, :TOTAL)';
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text,0);
+    ParamByName('PROD').AsString := EdProduto.Text;
+    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text,0);
+    ParamByName('UNIT').AsFloat := StrToFloatDef(EdVlrUnit.Text,0);
+    ParamByName('DESC').AsFloat := StrToFloatDef(EdDescItem.Text,0);
+    ParamByName('TOTAL').AsFloat := StrToFloatDef(EdVlrTotalItem.Text,0);
+    ExecSQL;
+  end;
+
+  CarregarItens;
+  AtualizarTotalVenda;
+  AtualizarStatusFinalizar;
+end;
+
+procedure TTelaVendas.AtualizarTotalVenda;
+begin
+  with DataModule1.QryVendas do
+  begin
+    Close;
+    SQL.Text :=
+      'SELECT COALESCE(SUM(VL_TOTAL),0) AS TOTAL ' +
+      'FROM ITENS_VENDA WHERE NUM_VENDA = :NUM_VENDA';
+    ParamByName('NUM_VENDA').AsInteger := StrToIntDef(EdNumVenda.Text,0);
+    Open;
+    EdTotalVenda.Text := FormatFloat('0.00', FieldByName('TOTAL').AsFloat);
+  end;
+end;
+
+procedure TTelaVendas.AtualizarStatusFinalizar;
+begin
+  BtnFinalizar.Enabled := (StrToFloatDef(EdTotalVenda.Text, 0) > 0);
+end;
+
+procedure TTelaVendas.BtnLimparClick(Sender: TObject);
+begin
+  EdProduto.Clear;
+  EdQuantidade.Clear;
+  EdVlrUnit.Clear;
+  EdDescItem.Clear;
+  EdVlrTotalItem.Clear;
+end;
+
+procedure TTelaVendas.BtnFinalizarClick(Sender: TObject);
+begin
+  if not BtnFinalizar.Enabled then Exit;
+
+  // ATUALIZA a venda (ao invés de inserir)
+  with DataModule1.QryVendas do
+  begin
+    Close;
+    SQL.Text := 'UPDATE VENDAS SET DATA = :DATA, CLIENTE = :CLI, TOTAL = :TOTAL ' +
+                'WHERE ID = :ID';
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text, 0);
+    ParamByName('DATA').AsDate := DTPData.Date;
+    ParamByName('CLI').AsString := EdNomeCliente.Text;
+    ParamByName('TOTAL').AsFloat := StrToFloatDef(EdTotalVenda.Text, 0);
+    ExecSQL;
+  end;
+
+  ShowMessage('Venda finalizada!');
+end;
+
+procedure TTelaVendas.GridVendasDblClick(Sender: TObject);
+var
+  IDItem: Integer;
+begin
+  if DataModule1.QryItensVenda.IsEmpty then Exit;
+
+  if MessageDlg('Excluir item?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  begin
+    IDItem := DataModule1.QryItensVenda.FieldByName('ID').AsInteger;
+
+    with DataModule1.QryItensVenda do
+    begin
+      Close;
+      SQL.Text := 'DELETE FROM ITENS_VENDA WHERE ID = :ID';
+      ParamByName('ID').AsInteger := IDItem;
+      ExecSQL;
+    end;
+
+    CarregarItens;
+    AtualizarTotalVenda;
+    AtualizarStatusFinalizar;
+  end;
+end;
+
+procedure TTelaVendas.EdNomeClienteKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_F2 then
+  begin
+    if not Assigned(PesqsCliente) then
+      PesqsCliente := TPesqsCliente.Create(Application);
+    PesqsCliente.ShowModal;
+  end;
+end;
+
+procedure TTelaVendas.EdProdutoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_F2 then
+  begin
+    if not Assigned(PesqsProdutos) then
+      PesqsProdutos := TPesqsProdutos.Create(Application);
+    PesqsProdutos.ShowModal;
+  end;
+end;
+
+procedure TTelaVendas.BloquearFocoEdit(Sender: TObject);
+begin
+  ActiveControl := nil;
+end;
+
+procedure TTelaVendas.BloquearCliqueEdit(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  ActiveControl := nil;
+end;
+
+
+end.
+

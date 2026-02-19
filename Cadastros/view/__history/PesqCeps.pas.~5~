@@ -1,0 +1,35 @@
+unit PesqCeps;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Data.DB, Vcl.StdCtrls,
+  Vcl.Grids, Vcl.DBGrids, Banco;
+
+type
+  TPesqsCeps = class(TForm)
+    PnlFundo: TPanel;
+    PnlRodapé: TPanel;
+    BtnSelecionar: TButton;
+    GridCeps: TDBGrid;
+    DataSource1: TDataSource;
+    LbCeps: TLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  PesqsCeps: TPesqsCeps;
+
+implementation
+
+{$R *.dfm}
+
+uses
+
+CadsCep;
+
+end.

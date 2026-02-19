@@ -1,0 +1,138 @@
+object RelatCompras: TRelatCompras
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Relat'#243'rio de Compras'
+  ClientHeight = 282
+  ClientWidth = 629
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  Position = poScreenCenter
+  TextHeight = 13
+  object PnlFundo: TPanel
+    Left = 0
+    Top = 0
+    Width = 629
+    Height = 282
+    Align = alClient
+    Color = clInactiveCaption
+    ParentBackground = False
+    TabOrder = 0
+    object LbDataInicio: TLabel
+      Left = 40
+      Top = 32
+      Width = 87
+      Height = 18
+      Caption = 'Data In'#237'cio:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbDataFim: TLabel
+      Left = 307
+      Top = 32
+      Width = 71
+      Height = 18
+      Caption = 'Data Fim:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbExportar: TLabel
+      Left = 40
+      Top = 145
+      Width = 70
+      Height = 18
+      Caption = 'Exportar:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object DTPDataInicio: TDateTimePicker
+      Left = 40
+      Top = 56
+      Width = 145
+      Height = 24
+      Date = 46058.000000000000000000
+      Time = 0.720180856478691600
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+    end
+    object DTPDataFim: TDateTimePicker
+      Left = 307
+      Top = 56
+      Width = 145
+      Height = 24
+      Date = 46058.000000000000000000
+      Time = 0.720180856478691600
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+    end
+    object PnlRodape: TPanel
+      Left = 1
+      Top = 234
+      Width = 627
+      Height = 47
+      Align = alBottom
+      Color = clGradientInactiveCaption
+      ParentBackground = False
+      TabOrder = 2
+      object BtnGerar: TButton
+        Left = 472
+        Top = 8
+        Width = 145
+        Height = 33
+        Cursor = crHandPoint
+        Caption = 'Gerar'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 0
+        OnClick = BtnGerarClick
+      end
+    end
+    object CbExportar: TComboBox
+      Left = 40
+      Top = 169
+      Width = 145
+      Height = 24
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 3
+      Text = 'N'#227'o'
+      Items.Strings = (
+        'PDF'
+        'N'#227'o')
+    end
+  end
+end

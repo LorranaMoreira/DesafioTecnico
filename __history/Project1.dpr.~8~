@@ -1,0 +1,32 @@
+program Project1;
+
+uses
+  Vcl.Forms,
+  TelaPrincipal in 'TelaPrincipal.pas' {Principal},
+  CadsProdutos in 'Cadastros\CadsProdutos.pas' {CadProdutos},
+  CadsCliente in 'Cadastros\CadsCliente.pas' {CadCliente},
+  CadsCep in 'Cadastros\CadsCep.pas' {CadastroCep},
+  PesqProdutos in 'Cadastros\view\PesqProdutos.pas' {PesqsProdutos},
+  PesqClientes in 'Cadastros\view\PesqClientes.pas' {PesqsCliente},
+  PesqCeps in 'Cadastros\view\PesqCeps.pas' {PesqsCeps},
+  Banco in 'DB\Banco.pas' {DataModule1: TDataModule},
+  Vendas in 'Vendas\Vendas.pas' {TelaVendas},
+  Compras in 'Compras\Compras.pas' {TelaCompras};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TPrincipal, Principal);
+  Application.CreateForm(TCadProdutos, CadProdutos);
+  Application.CreateForm(TCadCliente, CadCliente);
+  Application.CreateForm(TCadastroCep, CadastroCep);
+  Application.CreateForm(TPesqsProdutos, PesqsProdutos);
+  Application.CreateForm(TPesqsCliente, PesqsCliente);
+  Application.CreateForm(TPesqsCeps, PesqsCeps);
+  Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TTelaVendas, TelaVendas);
+  Application.CreateForm(TTelaCompras, TelaCompras);
+  Application.Run;
+end.

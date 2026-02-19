@@ -1,0 +1,231 @@
+unit CadsCliente;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param, Banco, dxGDIPlusClasses;
+
+type
+  TCadCliente = class(TForm)
+    PnlDadosPessoais: TPanel;
+    LbCod: TLabel;
+    LbNome: TLabel;
+    LbCPFCNPJ: TLabel;
+    LbTelefone: TLabel;
+    LbEmail: TLabel;
+    PnlDadosCliente: TPanel;
+    LbDadosPessoais: TLabel;
+    EdtCod: TEdit;
+    EdtNome: TEdit;
+    EdtCPFCNPJ: TEdit;
+    EdtTelefone: TEdit;
+    EdtEmail: TEdit;
+    EdtUF: TEdit;
+    PnlRodape: TPanel;
+    LbEndereco: TLabel;
+    EdtEndereco: TEdit;
+    LbNumero: TLabel;
+    EdtNumero: TEdit;
+    EdtCidade: TEdit;
+    LbCidade: TLabel;
+    LbUF: TLabel;
+    LbCep: TLabel;
+    EdtCep: TEdit;
+    PnlEnunciadoEndereco: TPanel;
+    LbEnderecoCliente: TLabel;
+    BtnBuscar: TButton;
+    BtnSalvar: TButton;
+    BtnEditar: TButton;
+    BtnLimpar: TButton;
+    ImgFotoCliente: TImage;
+    BtnCarregarFoto: TButton;
+
+    procedure FormCreate(Sender: TObject);
+    procedure BtnSalvarClick(Sender: TObject);
+    procedure BtnEditarClick(Sender: TObject);
+    procedure BtnBuscarClick(Sender: TObject);
+    procedure BtnLimparClick(Sender: TObject);
+    procedure BtnCarregarFotoClick(Sender: TObject);
+  private
+
+    FCaminhoFoto: string;
+    function ValidarCampos: Boolean;
+    procedure LimparCampos;
+  public
+
+     FEditando: Boolean;
+    { Public declarations }
+  end;
+
+var
+  CadCliente: TCadCliente;
+
+implementation
+
+uses PesqClientes;
+
+{$R *.dfm}
+
+procedure TCadCliente.FormCreate(Sender: TObject);
+begin
+  FEditando := False;
+  FCaminhoFoto := '';
+  EdtCod.ReadOnly := True;
+  EdtCod.Color := clBtnFace;
+end;
+
+procedure TCadCliente.LimparCampos;
+begin
+  EdtCod.Clear;
+  EdtNome.Clear;
+  EdtCPFCNPJ.Clear;
+  EdtTelefone.Clear;
+  EdtEmail.Clear;
+  EdtCep.Clear;
+  EdtUF.Clear;
+  EdtCidade.Clear;
+  EdtEndereco.Clear;
+  EdtNumero.Clear;
+  ImgFotoCliente.Picture := nil;
+  FCaminhoFoto := '';
+  FEditando := False;
+end;
+
+function TCadCliente.ValidarCampos: Boolean;
+begin
+  Result := False;
+
+  if Trim(EdtNome.Text) = '' then
+  begin
+    ShowMessage('O nome do cliente é obrigatório.');
+    EdtNome.SetFocus;
+    Exit;
+  end;
+
+  Result := True;
+end;
+
+procedure TCadCliente.BtnSalvarClick(Sender: TObject);
+var
+  IdCep: Integer;
+begin
+  if not ValidarCampos then Exit;
+
+  try
+    if Trim(EdtCep.Text) = '' then
+      IdCep := 0
+    else
+      IdCep := StrToIntDef(EdtCep.Text, 0);
+
+    if not FEditando then
+    begin
+      with DataModule1.QryClientes do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Text :=
+          'INSERT INTO CLIENTES (NOME, CPF_CNPJ, TELEFONE, EMAIL, ID_CEP, ENDERECO, NUMERO, CIDADE, UF, FOTO) ' +
+          'VALUES (:NOME, :CPF, :TEL, :EMAIL, :ID_CEP, :END, :NUM, :CIDADE, :UF, :FOTO)';
+        ParamByName('NOME').AsString := Trim(EdtNome.Text);
+        ParamByName('CPF').AsString := Trim(EdtCPFCNPJ.Text);
+        ParamByName('TEL').AsString := Trim(EdtTelefone.Text);
+        ParamByName('EMAIL').AsString := Trim(EdtEmail.Text);
+
+        if IdCep > 0 then
+          ParamByName('ID_CEP').AsInteger := IdCep
+        else
+          ParamByName('ID_CEP').Clear;
+
+        ParamByName('END').AsString := Trim(EdtEndereco.Text);
+        ParamByName('NUM').AsString := Trim(EdtNumero.Text);
+        ParamByName('CIDADE').AsString := Trim(EdtCidade.Text);
+        ParamByName('UF').AsString := Trim(EdtUF.Text);
+        ParamByName('FOTO').AsString := FCaminhoFoto;
+        ExecSQL;
+      end;
+      ShowMessage('Cliente cadastrado com sucesso!');
+    end
+    else
+    begin
+      with DataModule1.QryClientes do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Text :=
+          'UPDATE CLIENTES SET NOME = :NOME, CPF_CNPJ = :CPF, TELEFONE = :TEL, EMAIL = :EMAIL, ' +
+          'ID_CEP = :ID_CEP, ENDERECO = :END, NUMERO = :NUM, CIDADE = :CIDADE, UF = :UF, FOTO = :FOTO WHERE ID = :ID';
+        ParamByName('ID').AsInteger := StrToInt(EdtCod.Text);
+        ParamByName('NOME').AsString := Trim(EdtNome.Text);
+        ParamByName('CPF').AsString := Trim(EdtCPFCNPJ.Text);
+        ParamByName('TEL').AsString := Trim(EdtTelefone.Text);
+        ParamByName('EMAIL').AsString := Trim(EdtEmail.Text);
+
+        if IdCep > 0 then
+          ParamByName('ID_CEP').AsInteger := IdCep
+        else
+          ParamByName('ID_CEP').Clear;
+
+        ParamByName('END').AsString := Trim(EdtEndereco.Text);
+        ParamByName('NUM').AsString := Trim(EdtNumero.Text);
+        ParamByName('CIDADE').AsString := Trim(EdtCidade.Text);
+        ParamByName('UF').AsString := Trim(EdtUF.Text);
+        ParamByName('FOTO').AsString := FCaminhoFoto;
+        ExecSQL;
+      end;
+      ShowMessage('Cliente atualizado com sucesso!');
+    end;
+
+    LimparCampos;
+  except
+    on E: Exception do
+      ShowMessage('Erro ao salvar cliente: ' + E.Message);
+  end;
+end;
+
+procedure TCadCliente.BtnEditarClick(Sender: TObject);
+begin
+  if Trim(EdtCod.Text) = '' then
+  begin
+    ShowMessage('Busque um cliente primeiro.');
+    Exit;
+  end;
+
+  FEditando := True;
+  EdtNome.SetFocus;
+  ShowMessage('Modo de edição ativado. Altere os dados e clique em Salvar.');
+end;
+
+procedure TCadCliente.BtnBuscarClick(Sender: TObject);
+begin
+  if not Assigned(PesqsCliente) then
+    PesqsCliente := TPesqsCliente.Create(Application);
+
+  PesqsCliente.ShowModal;
+end;
+
+procedure TCadCliente.BtnLimparClick(Sender: TObject);
+begin
+  LimparCampos;
+end;
+
+procedure TCadCliente.BtnCarregarFotoClick(Sender: TObject);
+var
+  OpenDialog: TOpenDialog;
+begin
+  OpenDialog := TOpenDialog.Create(Self);
+  try
+    OpenDialog.Filter := 'Imagens|*.bmp;*.jpg;*.jpeg;*.png';
+    if OpenDialog.Execute then
+    begin
+      ImgFotoCliente.Picture.LoadFromFile(OpenDialog.FileName);
+      FCaminhoFoto := OpenDialog.FileName;
+      ImgFotoCliente.Stretch := True;
+    end;
+  finally
+    OpenDialog.Free;
+  end;
+end;
+
+end.

@@ -1,0 +1,118 @@
+﻿object PesqsProdutos: TPesqsProdutos
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Pesquisa de Produtos'
+  ClientHeight = 389
+  ClientWidth = 602
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PnlFundo: TPanel
+    Left = 0
+    Top = 0
+    Width = 602
+    Height = 389
+    Align = alClient
+    Color = clInactiveCaption
+    ParentBackground = False
+    TabOrder = 0
+    object LbProdutos: TLabel
+      Left = 24
+      Top = 10
+      Width = 108
+      Height = 29
+      Caption = 'Produtos'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -24
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object GridProdutos: TDBGrid
+      Left = 24
+      Top = 45
+      Width = 545
+      Height = 268
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -12
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = [fsBold]
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'Cod'
+          Width = 54
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'Descricao'
+          Width = 210
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'Marca'
+          Width = 140
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'Estoque'
+          Width = 62
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'Valor_Unit'
+          Width = 79
+          Visible = True
+        end>
+    end
+    object PnlRodapé: TPanel
+      Left = 1
+      Top = 347
+      Width = 600
+      Height = 41
+      Align = alBottom
+      Color = clGradientInactiveCaption
+      ParentBackground = False
+      TabOrder = 1
+      object BtnSelecionar: TButton
+        Left = 432
+        Top = 5
+        Width = 136
+        Height = 31
+        Caption = 'Selecionar'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 0
+      end
+    end
+  end
+  object DataSource1: TDataSource
+    DataSet = DataModule1.QryProdutos
+    Left = 536
+    Top = 280
+  end
+end

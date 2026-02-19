@@ -1,0 +1,33 @@
+unit RelatorioCompras;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls;
+
+type
+  TRelatCompras = class(TForm)
+    PnlFundo: TPanel;
+    LbDataInicio: TLabel;
+    LbDataFim: TLabel;
+    LbExportar: TLabel;
+    DTPDataInicio: TDateTimePicker;
+    DTPDataFim: TDateTimePicker;
+    PnlRodape: TPanel;
+    BtnGerar: TButton;
+    CbExportar: TComboBox;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  RelatCompras: TRelatCompras;
+
+implementation
+
+{$R *.dfm}
+
+end.

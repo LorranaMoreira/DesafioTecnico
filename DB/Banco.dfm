@@ -1,0 +1,80 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = True
+  Height = 380
+  Width = 522
+  object FDConnection: TFDConnection
+    Params.Strings = (
+      
+        'Database=C:\Workspace\Delphi\DesafioTecnico\Banco de Dados\DESAF' +
+        'IO.FDB'
+      'User_Name=SYSDBA'
+      'Password=masterkey'
+      'DriverID=FB')
+    Left = 28
+    Top = 16
+  end
+  object QryClientes: TFDQuery
+    Connection = FDConnection
+    Left = 72
+    Top = 104
+  end
+  object QryCep: TFDQuery
+    Connection = FDConnection
+    Left = 288
+    Top = 104
+  end
+  object QryCompras: TFDQuery
+    Connection = FDConnection
+    Left = 400
+    Top = 104
+  end
+  object QryVendas: TFDQuery
+    Connection = FDConnection
+    Left = 72
+    Top = 216
+  end
+  object QryRelatorios: TFDQuery
+    Connection = FDConnection
+    Left = 184
+    Top = 216
+    object QryRelatoriosID: TIntegerField
+      FieldName = 'ID'
+      Origin = 'ID'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+      Required = True
+    end
+    object QryRelatoriosDATA: TDateField
+      FieldName = 'DATA'
+      Origin = '"DATA"'
+      Required = True
+    end
+    object QryRelatoriosCLIENTE: TStringField
+      FieldName = 'CLIENTE'
+      Origin = 'CLIENTE'
+      Required = True
+      Size = 100
+    end
+    object QryRelatoriosTOTAL: TFMTBCDField
+      FieldName = 'TOTAL'
+      Origin = 'TOTAL'
+      Required = True
+      Precision = 18
+      Size = 2
+    end
+  end
+  object QryProdutos: TFDQuery
+    Connection = FDConnection
+    Left = 184
+    Top = 104
+  end
+  object QryItensVenda: TFDQuery
+    Connection = FDConnection
+    Left = 296
+    Top = 216
+  end
+  object QryItensCompra: TFDQuery
+    Connection = FDConnection
+    Left = 400
+    Top = 216
+  end
+end

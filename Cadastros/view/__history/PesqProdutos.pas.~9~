@@ -1,0 +1,108 @@
+unit PesqProdutos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.StdCtrls,
+  Vcl.Grids, Vcl.DBGrids, Vcl.ExtCtrls, Banco;
+
+type
+  TPesqsProdutos = class(TForm)
+    PnlFundo: TPanel;
+    LbProdutos: TLabel;
+    GridProdutos: TDBGrid;
+    BtnSelecionar: TButton;
+    DataSource1: TDataSource;
+    procedure FormShow(Sender: TObject);
+    procedure BtnSelecionarClick(Sender: TObject);
+    procedure GridProdutosDblClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    procedure PreencherCadastro;
+  public
+    { Public declarations }
+  end;
+
+var
+  PesqsProdutos: TPesqsProdutos;
+
+implementation
+
+uses
+  CadsProdutos;
+
+{$R *.dfm}
+
+procedure TPesqsProdutos.FormShow(Sender: TObject);
+begin
+  try
+    // Liga o DataSource ao Query
+    DataSource1.DataSet := DataModule1.QryProdutos;
+    GridProdutos.DataSource := DataSource1;
+
+    with DataModule1.QryProdutos do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Text :=
+        'SELECT ID, DESCRICAO, VALOR_UNITARIO, MARCA, ESTOQUE, FOTO ' +
+        'FROM PRODUTOS ' +
+        'ORDER BY DESCRICAO';
+      // Ativa o QryProdutos
+      Open;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('Erro ao carregar produtos: ' + E.Message);
+  end;
+end;
+
+procedure TPesqsProdutos.PreencherCadastro;
+begin
+  if not DataModule1.QryProdutos.IsEmpty then
+  begin
+    CadProdutos.EDCodigo.Text    := DataModule1.QryProdutos.FieldByName('ID').AsString;
+    CadProdutos.EdDescricao.Text := DataModule1.QryProdutos.FieldByName('DESCRICAO').AsString;
+    CadProdutos.EditMarca.Text   := DataModule1.QryProdutos.FieldByName('MARCA').AsString;
+    CadProdutos.EDEstoque.Text   := DataModule1.QryProdutos.FieldByName('ESTOQUE').AsString;
+    CadProdutos.EDVlrUnit.Text   := FormatFloat('0.00',
+      DataModule1.QryProdutos.FieldByName('VALOR_UNITARIO').AsFloat);
+
+    // Se houver foto salva no banco (caminho), tenta carregar
+    if Trim(DataModule1.QryProdutos.FieldByName('FOTO').AsString) <> '' then
+    begin
+      try
+        CadProdutos.ImgFoto.Picture.LoadFromFile(DataModule1.QryProdutos.FieldByName('FOTO').AsString);
+        CadProdutos.ImgFoto.Stretch := True;
+      except
+        on E: Exception do
+          ShowMessage('Não foi possível carregar a foto: ' + E.Message);
+      end;
+    end;
+
+    CadProdutos.BtnSalvar.Enabled := False;
+    CadProdutos.BtnEditar.Enabled := True;
+    CadProdutos.HabilitarCampos(False);
+  end
+  else
+    ShowMessage('Nenhum produto selecionado.');
+end;
+
+procedure TPesqsProdutos.BtnSelecionarClick(Sender: TObject);
+begin
+  PreencherCadastro;
+end;
+
+procedure TPesqsProdutos.GridProdutosDblClick(Sender: TObject);
+begin
+  BtnSelecionarClick(Sender);
+end;
+
+procedure TPesqsProdutos.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  PesqsProdutos := nil;
+end;
+
+end.

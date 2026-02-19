@@ -1,0 +1,223 @@
+﻿unit CadsProdutos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param, Banco;
+
+type
+  TCadProdutos = class(TForm)
+    PnlFundo: TPanel;
+    LBCodigo: TLabel;
+    LBDescricao: TLabel;
+    LBVlrUnit: TLabel;
+    LBMarca: TLabel;
+    LbEstoque: TLabel;
+    PnlRodape: TPanel;
+    BtnSalvar: TButton;
+    BtnEditar: TButton;
+    BtnLimpar: TButton;
+    PnlEnunciado: TPanel;
+    EdDescricao: TEdit;
+    EDCodigo: TEdit;
+    EDVlrUnit: TEdit;
+    EditMarca: TEdit;
+    EDEstoque: TEdit;
+    ImgFoto: TImage;
+    BtnPesquisar: TButton;
+    BtnCarregarFoto: TButton;
+
+    procedure FormCreate(Sender: TObject);
+    procedure BtnSalvarClick(Sender: TObject);
+    procedure BtnEditarClick(Sender: TObject);
+    procedure BtnLimparClick(Sender: TObject);
+    procedure BtnPesquisarClick(Sender: TObject);
+    procedure BtnCarregarFotoClick(Sender: TObject);
+    procedure EDCodigoEnter(Sender: TObject);
+    procedure EDCodigoMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+  private
+    FEditando: Boolean;
+    FCaminhoFoto: string;
+    procedure LimparCampos;
+    function ValidarCampos: Boolean;
+  public
+    procedure HabilitarCampos(Ativo: Boolean);
+  end;
+
+var
+  CadProdutos: TCadProdutos;
+
+implementation
+
+uses PesqProdutos;
+
+{$R *.dfm}
+
+procedure TCadProdutos.FormCreate(Sender: TObject);
+begin
+  FEditando := False;
+  FCaminhoFoto := '';
+
+  EDCodigo.ReadOnly := True;
+  EDCodigo.TabStop := False;
+  EDCodigo.Color := clBtnFace;
+  EDCodigo.Cursor := crArrow;
+
+  BtnSalvar.Enabled := True;
+  BtnEditar.Enabled := False;
+
+  HabilitarCampos(True);
+end;
+
+procedure TCadProdutos.EDCodigoEnter(Sender: TObject);
+begin
+  ActiveControl := nil;
+end;
+
+procedure TCadProdutos.EDCodigoMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  ActiveControl := nil;
+end;
+
+procedure TCadProdutos.HabilitarCampos(Ativo: Boolean);
+begin
+  EdDescricao.Enabled := Ativo;
+  EDVlrUnit.Enabled := Ativo;
+  EditMarca.Enabled := Ativo;
+  EDEstoque.Enabled := Ativo;
+  BtnCarregarFoto.Enabled := Ativo;
+end;
+
+procedure TCadProdutos.LimparCampos;
+begin
+  EDCodigo.Clear;
+  EdDescricao.Clear;
+  EDVlrUnit.Clear;
+  EditMarca.Clear;
+  EDEstoque.Clear;
+
+  ImgFoto.Picture := nil;
+
+  FCaminhoFoto := '';
+  FEditando := False;
+
+  BtnSalvar.Enabled := True;
+  BtnEditar.Enabled := False;
+
+  HabilitarCampos(True);
+end;
+
+function TCadProdutos.ValidarCampos: Boolean;
+var
+  VFloat: Double;
+  VInt: Integer;
+begin
+  Result := False;
+
+  if Trim(EdDescricao.Text) = '' then
+  begin
+    ShowMessage('Descrição é obrigatória.');
+    Exit;
+  end;
+
+  if not TryStrToFloat(EDVlrUnit.Text, VFloat) then
+  begin
+    ShowMessage('Valor unitário inválido.');
+    Exit;
+  end;
+
+  if not TryStrToInt(EDEstoque.Text, VInt) then
+  begin
+    ShowMessage('Estoque inválido.');
+    Exit;
+  end;
+
+  Result := True;
+end;
+
+procedure TCadProdutos.BtnSalvarClick(Sender: TObject);
+begin
+  if not ValidarCampos then Exit;
+
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Clear;
+
+    if not FEditando then
+      SQL.Text :=
+        'INSERT INTO PRODUTOS (DESCRICAO, VALOR_UNITARIO, MARCA, ESTOQUE, FOTO) ' +
+        'VALUES (:DESC, :VALOR, :MARCA, :ESTOQUE, :FOTO)'
+    else
+      SQL.Text :=
+        'UPDATE PRODUTOS SET DESCRICAO = :DESC, VALOR_UNITARIO = :VALOR, ' +
+        'MARCA = :MARCA, ESTOQUE = :ESTOQUE, FOTO = :FOTO WHERE ID = :ID';
+
+    if FEditando then
+      ParamByName('ID').AsInteger := StrToInt(EDCodigo.Text);
+
+    ParamByName('DESC').AsString := EdDescricao.Text;
+    ParamByName('VALOR').AsFloat := StrToFloat(EDVlrUnit.Text);
+    ParamByName('MARCA').AsString := EditMarca.Text;
+    ParamByName('ESTOQUE').AsInteger := StrToInt(EDEstoque.Text);
+
+    if FCaminhoFoto <> '' then
+      ParamByName('FOTO').LoadFromFile(FCaminhoFoto, ftBlob)
+    else
+      ParamByName('FOTO').Clear;
+
+    ExecSQL;
+  end;
+
+  ShowMessage('Produto salvo com sucesso!');
+  LimparCampos;
+end;
+
+procedure TCadProdutos.BtnEditarClick(Sender: TObject);
+begin
+  if EDCodigo.Text = '' then Exit;
+
+  FEditando := True;
+  BtnEditar.Enabled := False;
+  BtnSalvar.Enabled := True;
+
+  HabilitarCampos(True);
+end;
+
+procedure TCadProdutos.BtnLimparClick(Sender: TObject);
+begin
+  LimparCampos;
+end;
+
+procedure TCadProdutos.BtnPesquisarClick(Sender: TObject);
+begin
+  if PesqsProdutos = nil then
+    PesqsProdutos := TPesqsProdutos.Create(Self);
+
+  PesqsProdutos.ShowModal;
+end;
+
+procedure TCadProdutos.BtnCarregarFotoClick(Sender: TObject);
+var
+  OpenDialog: TOpenDialog;
+begin
+  OpenDialog := TOpenDialog.Create(Self);
+  try
+    OpenDialog.Filter := 'Imagens|*.bmp;*.jpg;*.jpeg;*.png';
+    if OpenDialog.Execute then
+    begin
+      FCaminhoFoto := OpenDialog.FileName;
+      ImgFoto.Picture.LoadFromFile(FCaminhoFoto);
+      ImgFoto.Stretch := True;
+    end;
+  finally
+    OpenDialog.Free;
+  end;
+end;
+
+end.
+

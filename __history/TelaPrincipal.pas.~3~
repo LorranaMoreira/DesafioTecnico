@@ -1,0 +1,34 @@
+unit TelaPrincipal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, dxGDIPlusClasses,
+  Vcl.ExtCtrls, Banco;
+
+type
+  TPrincipal = class(TForm)
+    PnlFundo: TPanel;
+    ImgLogo: TImage;
+    BtnProdutos: TButton;
+    BtnClientes: TButton;
+    BtnCep: TButton;
+    BtnVendas: TButton;
+    BtnCompras: TButton;
+    BtnRelatVendas: TButton;
+    BtnRelatCompras: TButton;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Principal: TPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+end.

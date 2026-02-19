@@ -1,0 +1,135 @@
+object Principal: TPrincipal
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  ClientHeight = 446
+  ClientWidth = 620
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  TextHeight = 13
+  object PnlFundo: TPanel
+    Left = 0
+    Top = 0
+    Width = 620
+    Height = 446
+    Align = alClient
+    Color = clInactiveCaption
+    ParentBackground = False
+    TabOrder = 0
+    object ImgLogo: TImage
+      Left = 368
+      Top = 40
+      Width = 201
+      Height = 145
+    end
+    object BtnProdutos: TButton
+      Left = 48
+      Top = 33
+      Width = 201
+      Height = 57
+      Caption = 'Produtos'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      OnClick = BtnProdutosClick
+    end
+    object BtnClientes: TButton
+      Left = 48
+      Top = 113
+      Width = 201
+      Height = 57
+      Caption = 'Clientes'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+      OnClick = BtnClientesClick
+    end
+    object BtnCep: TButton
+      Left = 48
+      Top = 193
+      Width = 201
+      Height = 57
+      Caption = 'Cep'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 2
+      OnClick = BtnCepClick
+    end
+    object BtnVendas: TButton
+      Left = 48
+      Top = 272
+      Width = 201
+      Height = 58
+      Caption = 'Vendas'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 3
+      OnClick = BtnVendasClick
+    end
+    object BtnCompras: TButton
+      Left = 48
+      Top = 352
+      Width = 201
+      Height = 57
+      Caption = 'Compras'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 4
+      OnClick = BtnComprasClick
+    end
+    object BtnRelatVendas: TButton
+      Left = 368
+      Top = 240
+      Width = 201
+      Height = 57
+      Caption = 'Relat'#243'rio Vendas'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 5
+      OnClick = BtnRelatVendasClick
+    end
+    object BtnRelatCompras: TButton
+      Left = 368
+      Top = 320
+      Width = 201
+      Height = 57
+      Caption = 'Relat'#243'rio Compras'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 6
+      OnClick = BtnRelatComprasClick
+    end
+  end
+end

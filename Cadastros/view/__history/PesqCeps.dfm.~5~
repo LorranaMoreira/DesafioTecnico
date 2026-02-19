@@ -1,0 +1,114 @@
+﻿object PesqsCeps: TPesqsCeps
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Pesquisa de Ceps'
+  ClientHeight = 389
+  ClientWidth = 602
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PnlFundo: TPanel
+    Left = 0
+    Top = 0
+    Width = 602
+    Height = 389
+    Align = alClient
+    Color = clInactiveCaption
+    ParentBackground = False
+    TabOrder = 0
+    object LbCeps: TLabel
+      Left = 32
+      Top = 10
+      Width = 57
+      Height = 29
+      Caption = 'Ceps'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -24
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object PnlRodapé: TPanel
+      Left = 1
+      Top = 342
+      Width = 600
+      Height = 46
+      Align = alBottom
+      Color = clGradientInactiveCaption
+      ParentBackground = False
+      TabOrder = 0
+      object BtnSelecionar: TButton
+        Left = 445
+        Top = 6
+        Width = 115
+        Height = 33
+        Caption = 'Selecionar'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 0
+        OnClick = BtnSelecionarClick
+      end
+    end
+    object GridCeps: TDBGrid
+      Left = 32
+      Top = 48
+      Width = 529
+      Height = 257
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 1
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -12
+      TitleFont.Name = 'Tahoma'
+      TitleFont.Style = [fsBold]
+      OnDblClick = GridCepsDblClick
+      Columns = <
+        item
+          Expanded = False
+          Title.Caption = 'Cep'
+          Width = 91
+          Visible = True
+        end
+        item
+          Expanded = False
+          Title.Caption = 'Logradouro'
+          Width = 267
+          Visible = True
+        end
+        item
+          Expanded = False
+          Title.Caption = 'N'#186
+          Width = 51
+          Visible = True
+        end
+        item
+          Expanded = False
+          Title.Caption = 'Cidade'
+          Width = 101
+          Visible = True
+        end>
+    end
+  end
+  object DataSource1: TDataSource
+    DataSet = DataModule1.QryCep
+    Left = 520
+    Top = 272
+  end
+end

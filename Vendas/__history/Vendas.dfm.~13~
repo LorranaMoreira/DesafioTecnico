@@ -1,0 +1,385 @@
+object TelaVendas: TTelaVendas
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  ClientHeight = 534
+  ClientWidth = 890
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poScreenCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PnlFundo: TPanel
+    Left = 0
+    Top = 0
+    Width = 890
+    Height = 534
+    Align = alClient
+    Color = clInactiveCaption
+    ParentBackground = False
+    TabOrder = 0
+    object LbData: TLabel
+      Left = 16
+      Top = 10
+      Width = 45
+      Height = 19
+      Caption = 'Data:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbNomeCliente: TLabel
+      Left = 224
+      Top = 10
+      Width = 116
+      Height = 19
+      Caption = 'Nome Cliente:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbNumVenda: TLabel
+      Left = 712
+      Top = 10
+      Width = 83
+      Height = 19
+      Caption = 'N'#186' Venda:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbProduto: TLabel
+      Left = 24
+      Top = 122
+      Width = 71
+      Height = 19
+      Caption = 'Produto:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbQuantidade: TLabel
+      Left = 24
+      Top = 210
+      Width = 60
+      Height = 19
+      Caption = 'Quant.:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbVlrUnit: TLabel
+      Left = 142
+      Top = 210
+      Width = 93
+      Height = 19
+      Caption = 'Valor Unit.:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbDescItem: TLabel
+      Left = 264
+      Top = 210
+      Width = 93
+      Height = 19
+      Caption = 'Desc. Item:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbVlrTotalItem: TLabel
+      Left = 24
+      Top = 301
+      Width = 126
+      Height = 19
+      Caption = 'Vlr. Total Item:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object PnlDivisao: TPanel
+      Left = 0
+      Top = 80
+      Width = 931
+      Height = 25
+      Color = clGradientInactiveCaption
+      ParentBackground = False
+      TabOrder = 0
+    end
+    object PnlCupom: TPanel
+      Left = 392
+      Top = 127
+      Width = 473
+      Height = 290
+      Color = clGradientInactiveCaption
+      ParentBackground = False
+      TabOrder = 1
+      object LbCupom: TLabel
+        Left = 216
+        Top = 4
+        Width = 56
+        Height = 19
+        Caption = 'Cupom'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object GridVendas: TDBGrid
+        Left = 0
+        Top = 31
+        Width = 481
+        Height = 259
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 0
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -12
+        TitleFont.Name = 'Tahoma'
+        TitleFont.Style = [fsBold]
+        OnDblClick = GridVendasDblClick
+        Columns = <
+          item
+            Expanded = False
+            Title.Caption = 'C'#243'd.'
+            Visible = True
+          end
+          item
+            Expanded = False
+            Title.Caption = 'Produto'
+            Width = 327
+            Visible = True
+          end
+          item
+            Expanded = False
+            Title.Caption = 'Quant.'
+            Visible = True
+          end>
+      end
+    end
+    object PnlTotalVendas: TPanel
+      Left = 392
+      Top = 423
+      Width = 473
+      Height = 57
+      TabOrder = 2
+      object EdTotalVendas: TLabel
+        Left = 18
+        Top = 18
+        Width = 128
+        Height = 19
+        Caption = 'Total da venda:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+    end
+    object EdNomeCliente: TEdit
+      Left = 224
+      Top = 35
+      Width = 409
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 3
+      OnKeyDown = EdNomeClienteKeyDown
+    end
+    object EdNumVenda: TEdit
+      Left = 712
+      Top = 35
+      Width = 153
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 4
+    end
+    object EdVlrUnit: TEdit
+      Left = 142
+      Top = 235
+      Width = 99
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 5
+    end
+    object EdQuantidade: TEdit
+      Left = 24
+      Top = 235
+      Width = 97
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 6
+    end
+    object EdProduto: TEdit
+      Left = 24
+      Top = 147
+      Width = 345
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 7
+      OnKeyDown = EdProdutoKeyDown
+    end
+    object EdDescItem: TEdit
+      Left = 264
+      Top = 235
+      Width = 105
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 8
+    end
+    object EdVlrTotalItem: TEdit
+      Left = 24
+      Top = 326
+      Width = 137
+      Height = 31
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 9
+    end
+    object BtnFinalizar: TButton
+      Left = 696
+      Top = 486
+      Width = 169
+      Height = 43
+      Caption = 'Finalizar'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 10
+      OnClick = BtnFinalizarClick
+    end
+    object BtnAdicionar: TButton
+      Left = 200
+      Top = 312
+      Width = 169
+      Height = 45
+      Caption = 'Adicionar'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 11
+      OnClick = BtnAdicionarClick
+    end
+    object BtnLimpar: TButton
+      Left = 24
+      Top = 429
+      Width = 345
+      Height = 51
+      Caption = 'Limpar'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 12
+      OnClick = BtnLimparClick
+    end
+    object EdTotalVenda: TEdit
+      Left = 547
+      Top = 431
+      Width = 297
+      Height = 43
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -29
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 13
+    end
+    object DTPData: TDateTimePicker
+      Left = 16
+      Top = 35
+      Width = 137
+      Height = 26
+      Date = 46058.000000000000000000
+      Time = 0.664840381941758100
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 14
+    end
+  end
+end

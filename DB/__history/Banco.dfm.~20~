@@ -1,0 +1,72 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  Height = 380
+  Width = 522
+  object FDConnection: TFDConnection
+    Params.Strings = (
+      
+        'Database=C:\Workspace\Delphi\DesafioTecnico\Banco de Dados\DESAF' +
+        'IO.FDB'
+      'User_Name=SYSDBA'
+      'Password=masterkey'
+      'DriverID=FB')
+    Connected = True
+    Left = 28
+    Top = 16
+  end
+  object QryClientes: TFDQuery
+    Connection = FDConnection
+    Left = 72
+    Top = 104
+  end
+  object QryCep: TFDQuery
+    Connection = FDConnection
+    Left = 288
+    Top = 104
+  end
+  object QryCompras: TFDQuery
+    Connection = FDConnection
+    Left = 400
+    Top = 104
+  end
+  object QryVendas: TFDQuery
+    Connection = FDConnection
+    Left = 72
+    Top = 216
+  end
+  object QryRelatorios: TFDQuery
+    Connection = FDConnection
+    Left = 184
+    Top = 216
+  end
+  object QryProdutos: TFDQuery
+    Connection = FDConnection
+    Left = 184
+    Top = 104
+  end
+  object QryItensVenda: TFDQuery
+    Connection = FDConnection
+    Left = 296
+    Top = 216
+  end
+  object QryItensCompra: TFDQuery
+    Connection = FDConnection
+    Left = 400
+    Top = 216
+  end
+  object frxRTFExport1: TfrxRTFExport
+    UseFileCache = True
+    ShowProgress = True
+    OverwritePrompt = False
+    DataOnly = False
+    PictureType = gpPNG
+    OpenAfterExport = False
+    Wysiwyg = True
+    Creator = 'FastReport'
+    SuppressPageHeadersFooters = False
+    HeaderFooterMode = hfText
+    AutoSize = False
+    Left = 112
+    Top = 304
+  end
+end

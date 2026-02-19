@@ -1,0 +1,108 @@
+unit PesqClientes;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.StdCtrls,
+  Vcl.Grids, Vcl.DBGrids, Vcl.ExtCtrls, Banco;
+
+type
+  TPesqsCliente = class(TForm)
+    PnlFundo: TPanel;
+    LbClientes: TLabel;
+    GridClientes: TDBGrid;
+    PnlRodape: TPanel;
+    BntSelecionar: TButton;
+    DataSource1: TDataSource;
+    procedure FormShow(Sender: TObject);
+    procedure BntSelecionarClick(Sender: TObject);
+    procedure GridClientesDblClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    procedure PreencherCadastro;
+  public
+    { Public declarations }
+  end;
+
+var
+  PesqsCliente: TPesqsCliente;
+
+implementation
+
+uses
+  CadsCliente;
+
+{$R *.dfm}
+
+procedure TPesqsCliente.FormShow(Sender: TObject);
+begin
+  try
+    DataSource1.DataSet := DataModule1.QryClientes;
+    GridClientes.DataSource := DataSource1;
+
+    with DataModule1.QryClientes do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Text :=
+        'SELECT ID, NOME, CPF_CNPJ, TELEFONE, EMAIL, ID_CEP, ENDERECO, NUMERO, CIDADE, UF, FOTO ' +
+        'FROM CLIENTES ORDER BY NOME';
+      Open;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('Erro ao carregar clientes: ' + E.Message);
+  end;
+end;
+
+procedure TPesqsCliente.PreencherCadastro;
+begin
+  if not DataModule1.QryClientes.IsEmpty then
+  begin
+    CadCliente.EdtCod.Text      := DataModule1.QryClientes.FieldByName('ID').AsString;
+    CadCliente.EdtNome.Text     := DataModule1.QryClientes.FieldByName('NOME').AsString;
+    CadCliente.EdtCPFCNPJ.Text  := DataModule1.QryClientes.FieldByName('CPF_CNPJ').AsString;
+    CadCliente.EdtTelefone.Text := DataModule1.QryClientes.FieldByName('TELEFONE').AsString;
+    CadCliente.EdtEmail.Text    := DataModule1.QryClientes.FieldByName('EMAIL').AsString;
+    CadCliente.EdtCep.Text      := DataModule1.QryClientes.FieldByName('ID_CEP').AsString;
+    CadCliente.EdtUF.Text       := DataModule1.QryClientes.FieldByName('UF').AsString;
+    CadCliente.EdtCidade.Text   := DataModule1.QryClientes.FieldByName('CIDADE').AsString;
+    CadCliente.EdtEndereco.Text := DataModule1.QryClientes.FieldByName('ENDERECO').AsString;
+    CadCliente.EdtNumero.Text   := DataModule1.QryClientes.FieldByName('NUMERO').AsString;
+
+    // Se houver foto salva no banco (caminho), tenta carregar
+    if Trim(DataModule1.QryClientes.FieldByName('FOTO').AsString) <> '' then
+    begin
+      try
+        CadCliente.ImgFotoCliente.Picture.LoadFromFile(DataModule1.QryClientes.FieldByName('FOTO').AsString);
+        CadCliente.ImgFotoCliente.Stretch := True;
+      except
+        on E: Exception do
+          ShowMessage('Não foi possível carregar a foto: ' + E.Message);
+      end;
+    end;
+
+    CadCliente.FEditando := False;
+  end
+  else
+    ShowMessage('Nenhum cliente selecionado.');
+end;
+
+procedure TPesqsCliente.BntSelecionarClick(Sender: TObject);
+begin
+  PreencherCadastro;
+end;
+
+procedure TPesqsCliente.GridClientesDblClick(Sender: TObject);
+begin
+  BntSelecionarClick(Sender);
+end;
+
+procedure TPesqsCliente.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  PesqsCliente := nil;
+end;
+
+end.

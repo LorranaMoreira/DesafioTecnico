@@ -1,0 +1,118 @@
+unit PesqProdutos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.StdCtrls,
+  Vcl.Grids, Vcl.DBGrids, Vcl.ExtCtrls, Vendas, Banco;
+
+type
+  TPesqsProdutos = class(TForm)
+    PnlFundo: TPanel;
+    LbProdutos: TLabel;
+    GridProdutos: TDBGrid;
+    BtnSelecionar: TButton;
+    DataSource1: TDataSource;
+    procedure FormShow(Sender: TObject);
+    procedure BtnSelecionarClick(Sender: TObject);
+    procedure GridProdutosDblClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    procedure PreencherCadastro;
+  public
+  end;
+
+var
+  PesqsProdutos: TPesqsProdutos;
+
+implementation
+
+uses
+  CadsProdutos;
+
+{$R *.dfm}
+
+procedure TPesqsProdutos.FormShow(Sender: TObject);
+begin
+  DataSource1.DataSet := DataModule1.QryProdutos;
+  GridProdutos.DataSource := DataSource1;
+
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Clear;
+    SQL.Text :=
+      'SELECT ID, DESCRICAO, MARCA, ESTOQUE, VALOR_UNITARIO, FOTO ' +
+      'FROM PRODUTOS ' +
+      'ORDER BY DESCRICAO';
+    Open;
+  end;
+end;
+
+procedure TPesqsProdutos.PreencherCadastro;
+var
+  Stream: TMemoryStream;
+  Blob: TBlobField;
+begin
+  if DataModule1.QryProdutos.IsEmpty then Exit;
+
+  CadProdutos.EDCodigo.Text :=
+    DataModule1.QryProdutos.FieldByName('ID').AsString;
+
+  CadProdutos.EdDescricao.Text :=
+    DataModule1.QryProdutos.FieldByName('DESCRICAO').AsString;
+
+  CadProdutos.EditMarca.Text :=
+    DataModule1.QryProdutos.FieldByName('MARCA').AsString;
+
+  CadProdutos.EDEstoque.Text :=
+    DataModule1.QryProdutos.FieldByName('ESTOQUE').AsString;
+
+  CadProdutos.EDVlrUnit.Text :=
+    FormatFloat(
+      '0.00',
+      DataModule1.QryProdutos.FieldByName('VALOR_UNITARIO').AsFloat
+    );
+
+  CadProdutos.ImgFoto.Picture := nil;
+
+  Blob := DataModule1.QryProdutos.FieldByName('FOTO') as TBlobField;
+
+  if (Blob <> nil) and (not Blob.IsNull) then
+  begin
+    Stream := TMemoryStream.Create;
+    try
+      Blob.SaveToStream(Stream);
+      Stream.Position := 0;
+      CadProdutos.ImgFoto.Picture.LoadFromStream(Stream);
+      CadProdutos.ImgFoto.Stretch := True;
+    finally
+      Stream.Free;
+    end;
+  end;
+
+  CadProdutos.BtnSalvar.Enabled := False;
+  CadProdutos.BtnEditar.Enabled := True;
+  CadProdutos.HabilitarCampos(False);
+end;
+
+procedure TPesqsProdutos.BtnSelecionarClick(Sender: TObject);
+begin
+  PreencherCadastro;
+  ModalResult := mrOk; // fecha a tela corretamente
+end;
+
+procedure TPesqsProdutos.GridProdutosDblClick(Sender: TObject);
+begin
+  BtnSelecionarClick(Sender);
+end;
+
+procedure TPesqsProdutos.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  PesqsProdutos := nil;
+end;
+
+end.
+

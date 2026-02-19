@@ -1,0 +1,77 @@
+unit RelatorioVendas;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.StdCtrls,
+  Data.DB, Vcl.Grids, Vcl.DBGrids, Banco;
+
+type
+  TRelatVendas = class(TForm)
+    PnlFundo: TPanel;
+    LbDataInicio: TLabel;
+    LbDataFim: TLabel;
+    DTPDataInicio: TDateTimePicker;
+    DTPDataFim: TDateTimePicker;
+    PnlRodape: TPanel;
+    BtnGerar: TButton;
+    LbExportar: TLabel;
+    CbExportar: TComboBox;
+    GridVendas: TDBGrid;
+    DataSource1: TDataSource;
+
+    procedure FormCreate(Sender: TObject);
+    procedure BtnGerarClick(Sender: TObject);
+  private
+    procedure GerarRelatorio;
+  public
+    { Public declarations }
+  end;
+
+var
+  RelatVendas: TRelatVendas;
+
+implementation
+
+{$R *.dfm}
+
+procedure TRelatVendas.FormCreate(Sender: TObject);
+begin
+  CbExportar.Items.Clear;
+  CbExportar.Items.Add('Tela');
+  CbExportar.Items.Add('PDF');
+  CbExportar.ItemIndex := 0;
+end;
+
+procedure TRelatVendas.BtnGerarClick(Sender: TObject);
+begin
+  GerarRelatorio;
+end;
+
+procedure TRelatVendas.GerarRelatorio;
+begin
+  with DataModule1.QryRelatorios do
+  begin
+    Close;
+    SQL.Clear;
+    SQL.Text :=
+      'SELECT * FROM VENDAS ' +
+      'WHERE DATA BETWEEN :DTINI AND :DTFIM ' +
+      'ORDER BY DATA';
+    ParamByName('DTINI').AsDate := DTPDataInicio.Date;
+    ParamByName('DTFIM').AsDate := DTPDataFim.Date;
+    Open;
+  end;
+
+  DataSource1.DataSet := DataModule1.QryRelatorios;
+  GridVendas.DataSource := DataSource1;
+
+  if CbExportar.ItemIndex = 1 then
+  begin
+    // Aqui você pode integrar com FastReport ou QuickReport para gerar PDF
+    ShowMessage('Gerar PDF do relatório de vendas...');
+  end;
+end;
+
+end.
