@@ -63,7 +63,7 @@ begin
     CadastroCep.EdCEP.Text        := DataModule1.QryCep.FieldByName('CEP').AsString;
     CadastroCep.EdLogradouro.Text := DataModule1.QryCep.FieldByName('LOGRADOURO').AsString;
     CadastroCep.EdCidade.Text     := DataModule1.QryCep.FieldByName('CIDADE').AsString;
-    CadastroCep.EdUF.Text         := DataModule1.QryCep.FieldByName('UF').AsString;
+    CadastroCep.CbUF.Text         := DataModule1.QryCep.FieldByName('UF').AsString;
   end
   else
     ShowMessage('Nenhum CEP selecionado.');

@@ -50,6 +50,7 @@ type
     procedure BloquearFocoEdit(Sender: TObject);
     procedure BloquearCliqueEdit(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+
   private
     procedure CalcularTotalItem;
     procedure AtualizarTotalVenda;
@@ -59,6 +60,11 @@ type
     procedure CarregarItens;
     procedure ConfigurarGrid;
     procedure LimparTela;
+
+    // CONTROLE DE ESTOQUE
+    function VerificarEstoque: Boolean;
+    procedure BaixarEstoque;
+    procedure DevolverEstoque(Qtd: Integer; Produto: String);
 
   public
   end;
@@ -72,13 +78,75 @@ implementation
 
 uses PesqClientes, PesqProdutos;
 
+{ ================= ESTOQUE ================= }
+
+function TTelaVendas.VerificarEstoque: Boolean;
+var
+  EstoqueAtual: Integer;
+begin
+  Result := False;
+
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Text := 'SELECT ESTOQUE FROM PRODUTOS WHERE DESCRICAO = :PROD';
+    ParamByName('PROD').AsString := EdProduto.Text;
+    Open;
+
+    if IsEmpty then
+    begin
+      ShowMessage('Produto não encontrado.');
+      Exit;
+    end;
+
+    EstoqueAtual := FieldByName('ESTOQUE').AsInteger;
+
+    if EstoqueAtual < StrToIntDef(EdQuantidade.Text,0) then
+    begin
+      ShowMessage('Estoque insuficiente.');
+      Exit;
+    end;
+  end;
+
+  Result := True;
+end;
+
+procedure TTelaVendas.BaixarEstoque;
+begin
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Text :=
+      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD ' +
+      'WHERE DESCRICAO = :PROD';
+    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text,0);
+    ParamByName('PROD').AsString := EdProduto.Text;
+    ExecSQL;
+  end;
+end;
+
+procedure TTelaVendas.DevolverEstoque(Qtd: Integer; Produto: String);
+begin
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Text :=
+      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD ' +
+      'WHERE DESCRICAO = :PROD';
+    ParamByName('QTD').AsInteger := Qtd;
+    ParamByName('PROD').AsString := Produto;
+    ExecSQL;
+  end;
+end;
+
+{ ================= SEU CÓDIGO ORIGINAL ================= }
+
 procedure TTelaVendas.FormCreate(Sender: TObject);
 begin
   DTPData.Date := Date;
   EdTotalVenda.Text := '0,00';
   BtnFinalizar.Enabled := False;
 
-  // Configura o DataSource do Grid
   DSVendas.DataSet := DataModule1.QryItensVenda;
   GridVendas.DataSource := DSVendas;
 
@@ -98,7 +166,6 @@ begin
   DTPData.Date := Date;
   BtnFinalizar.Enabled := False;
 
-  // Fecha a query ao limpar
   DataModule1.QryItensVenda.Close;
 end;
 
@@ -111,7 +178,6 @@ begin
     Open;
     EdNumVenda.Text := FieldByName('PROXIMO').AsString;
 
-    // INSERE A VENDA INICIAL (provisória)
     Close;
     SQL.Text := 'INSERT INTO VENDAS (ID, DATA, CLIENTE, TOTAL) ' +
                 'VALUES (:ID, :DATA, :CLI, :TOTAL)';
@@ -179,10 +245,14 @@ procedure TTelaVendas.BtnAdicionarClick(Sender: TObject);
 begin
   if not ValidarItem then Exit;
 
+  if not VerificarEstoque then Exit;
+
   if Trim(EdNumVenda.Text) = '' then
     GerarVendaInicial;
 
   CalcularTotalItem;
+
+  BaixarEstoque;
 
   with DataModule1.QryItensVenda do
   begin
@@ -256,13 +326,18 @@ end;
 
 procedure TTelaVendas.GridVendasDblClick(Sender: TObject);
 var
-  IDItem: Integer;
+  IDItem, QtdItem: Integer;
+  ProdutoItem: String;
 begin
   if DataModule1.QryItensVenda.IsEmpty then Exit;
 
   if MessageDlg('Excluir item?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     IDItem := DataModule1.QryItensVenda.FieldByName('ID').AsInteger;
+    QtdItem := DataModule1.QryItensVenda.FieldByName('QTD').AsInteger;
+    ProdutoItem := DataModule1.QryItensVenda.FieldByName('PRODUTO').AsString;
+
+    DevolverEstoque(QtdItem, ProdutoItem);
 
     with DataModule1.QryItensVenda do
     begin
@@ -327,11 +402,8 @@ begin
     FormPesq := TPesqsCliente.Create(Self);
     try
       if FormPesq.ShowModal = mrOk then
-      begin
-        // Preenche o campo com o cliente selecionado
         if not DataModule1.QryClientes.IsEmpty then
           EdNomeCliente.Text := DataModule1.QryClientes.FieldByName('NOME').AsString;
-      end;
     finally
       FormPesq.Free;
     end;
@@ -347,14 +419,11 @@ begin
     FormPesq := TPesqsProdutos.Create(Self);
     try
       if FormPesq.ShowModal = mrOk then
-      begin
-        // Preenche os campos com o produto selecionado
         if not DataModule1.QryProdutos.IsEmpty then
         begin
           EdProduto.Text := DataModule1.QryProdutos.FieldByName('DESCRICAO').AsString;
           EdQuantidade.SetFocus;
         end;
-      end;
     finally
       FormPesq.Free;
     end;
@@ -373,3 +442,4 @@ begin
 end;
 
 end.
+

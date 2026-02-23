@@ -3,8 +3,8 @@
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Cadastro de Cep'
-  ClientHeight = 230
-  ClientWidth = 535
+  ClientHeight = 270
+  ClientWidth = 551
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,17 +13,21 @@
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
+  OnShow = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object PnlFundo: TPanel
     Left = 0
     Top = 0
-    Width = 535
-    Height = 230
+    Width = 551
+    Height = 270
     Align = alClient
     Color = clInactiveCaption
     ParentBackground = False
     TabOrder = 0
+    ExplicitLeft = 8
+    ExplicitWidth = 535
+    ExplicitHeight = 230
     object LbCEP: TLabel
       Left = 23
       Top = 38
@@ -76,11 +80,11 @@
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object ImgCep: TImage
-      Left = 392
-      Top = 30
-      Width = 116
-      Height = 134
+    object ImgLogo: TImage
+      Left = 395
+      Top = 51
+      Width = 129
+      Height = 139
       Picture.Data = {
         0D546478536D617274496D616765FFD8FFE000104A4649460001010000010001
         0000FFE201D84943435F50524F46494C45000101000001C80000000004300000
@@ -288,17 +292,45 @@
         AA02C01D3A589510B0EA34AE20A402852430CC3818119D13B91EBA348E436749
         34AD9D41227B785FFFD9}
     end
+    object LbBairros: TLabel
+      Left = 23
+      Top = 186
+      Width = 40
+      Height = 14
+      Caption = 'Bairro:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object LbNumero: TLabel
+      Left = 293
+      Top = 186
+      Width = 18
+      Height = 14
+      Caption = 'N'#186':'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
     object PnlRodapé: TPanel
       Left = 1
-      Top = 194
-      Width = 533
+      Top = 234
+      Width = 549
       Height = 35
       Align = alBottom
       Color = clGradientInactiveCaption
       ParentBackground = False
       TabOrder = 0
+      ExplicitTop = 194
+      ExplicitWidth = 533
       object BtnSalvar: TButton
-        Left = 432
+        Left = 445
         Top = 5
         Width = 75
         Height = 25
@@ -330,12 +362,12 @@
         OnClick = BtnLimparClick
       end
       object BtnBuscar: TButton
-        Left = 336
+        Left = 344
         Top = 5
-        Width = 75
+        Width = 95
         Height = 25
         Cursor = crHandPoint
-        Caption = 'Buscar'
+        Caption = 'Lista de CEPs'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -12
@@ -349,12 +381,13 @@
     object PnlEnunciado: TPanel
       Left = 1
       Top = 1
-      Width = 533
+      Width = 549
       Height = 8
       Align = alTop
       Color = clGradientInactiveCaption
       ParentBackground = False
       TabOrder = 1
+      ExplicitWidth = 533
     end
     object EdCEP: TEdit
       Left = 80
@@ -377,12 +410,61 @@
       Height = 21
       TabOrder = 4
     end
-    object EdUF: TEdit
-      Left = 318
-      Top = 87
-      Width = 51
+    object CbUF: TComboBox
+      Left = 317
+      Top = 88
+      Width = 52
       Height = 21
+      Style = csDropDownList
       TabOrder = 5
     end
+    object BtnPesqCep: TButton
+      Left = 292
+      Top = 34
+      Width = 77
+      Height = 28
+      Cursor = crHandPoint
+      Caption = 'Pesquisar'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 6
+      OnClick = BtnPesqCepClick
+    end
+    object EdBairro: TEdit
+      Left = 83
+      Top = 184
+      Width = 196
+      Height = 21
+      TabOrder = 7
+    end
+    object EdNumero: TEdit
+      Left = 317
+      Top = 184
+      Width = 52
+      Height = 21
+      TabOrder = 8
+    end
+  end
+  object TRESTClient: TRESTClient
+    BaseURL = 'https://viacep.com.br/ws/'
+    Params = <>
+    Left = 120
+    Top = 224
+  end
+  object RESTRequest1: TRESTRequest
+    Client = TRESTClient
+    Params = <>
+    Response = RESTResponse1
+    SynchronizedEvents = False
+    Left = 200
+    Top = 224
+  end
+  object RESTResponse1: TRESTResponse
+    Left = 288
+    Top = 224
   end
 end
