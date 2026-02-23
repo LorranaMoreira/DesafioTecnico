@@ -5,8 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Data.DB,
-  Vcl.StdCtrls, Vcl.Grids, Vcl.DBGrids, Banco,
-  FireDAC.Comp.Client, FireDAC.Stan.Param;
+  Vcl.StdCtrls, Vcl.Grids, Vcl.DBGrids, Banco;
 
 type
   TPesqsCeps = class(TForm)
@@ -19,9 +18,7 @@ type
     procedure BtnSelecionarClick(Sender: TObject);
     procedure GridCepsDblClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormDestroy(Sender: TObject);
   private
-    FQry: TFDQuery;
     procedure PreencherCadastro;
     procedure ConfigurarGrid;
   public
@@ -72,7 +69,6 @@ end;
 procedure TPesqsCeps.FormShow(Sender: TObject);
 begin
   try
-
     DataSource1.DataSet := DataModule1.QryCep;
     GridCeps.DataSource := DataSource1;
 
@@ -118,23 +114,11 @@ begin
   BtnSelecionarClick(Sender);
 end;
 
-procedure TPesqsCeps.FormDestroy(Sender: TObject);
+procedure TPesqsCeps.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   GridCeps.DataSource := nil;
   DataSource1.DataSet := nil;
-
-  if Assigned(FQry) then
-  begin
-    FQry.Close;
-    FQry.Free;
-    FQry := nil;
-  end;
-
   DataModule1.QryCep.Close;
-end;
-
-procedure TPesqsCeps.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
   Action    := caFree;
   PesqsCeps := nil;
 end;

@@ -79,13 +79,12 @@ uses PesqClientes;
 
 procedure TCadCliente.FormCreate(Sender: TObject);
 begin
-  FEditando       := False;
-  FCaminhoFoto    := '';
+  FEditando    := False;
+  FCaminhoFoto := '';
   EdtCod.ReadOnly := True;
   EdtCod.Color    := clBtnFace;
-  BtnSalvar.Enabled       := True;
-  BtnEditar.Enabled       := False;
-  BtnCarregarFoto.Enabled := False;
+  BtnSalvar.Enabled := True;
+  BtnEditar.Enabled := False;
 end;
 
 procedure TCadCliente.TirarSnapshot;
@@ -119,21 +118,20 @@ procedure TCadCliente.AtualizarBotoes;
 begin
   if FEditando then
   begin
-    BtnSalvar.Enabled       := HouveAlteracao;
-    BtnEditar.Enabled       := False;
-    BtnCarregarFoto.Enabled := True;
+    BtnSalvar.Enabled := HouveAlteracao;
+    BtnEditar.Enabled := False;
   end
   else if Trim(EdtCod.Text) <> '' then
   begin
-    BtnSalvar.Enabled       := False;
-    BtnEditar.Enabled       := True;
-    BtnCarregarFoto.Enabled := False;
+    // Cliente carregado mas não editando
+    BtnSalvar.Enabled := False;
+    BtnEditar.Enabled := True;
   end
   else
   begin
-    BtnSalvar.Enabled       := True;
-    BtnEditar.Enabled       := False;
-    BtnCarregarFoto.Enabled := True;
+    // Novo cliente
+    BtnSalvar.Enabled := True;
+    BtnEditar.Enabled := False;
   end;
 end;
 
@@ -191,17 +189,17 @@ begin
           'INSERT INTO CLIENTES (NOME, CPF_CNPJ, TELEFONE, EMAIL, ENDERECO, NUMERO, ' +
           'CIDADE, UF, CEP, LOGRADOURO, FOTO) ' +
           'VALUES (:NOME, :CPF, :TEL, :EMAIL, :END, :NUM, :CIDADE, :UF, :CEP, :LOGRADOURO, :FOTO)';
-        ParamByName('NOME').AsString       := Trim(EdtNome.Text);
-        ParamByName('CPF').AsString        := Trim(EdtCPFCNPJ.Text);
-        ParamByName('TEL').AsString        := Trim(EdtTelefone.Text);
-        ParamByName('EMAIL').AsString      := Trim(EdtEmail.Text);
-        ParamByName('END').AsString        := Trim(EdtEndereco.Text);
-        ParamByName('NUM').AsString        := Trim(EdtNumero.Text);
-        ParamByName('CIDADE').AsString     := Trim(EdtCidade.Text);
-        ParamByName('UF').AsString         := Trim(EdtUF.Text);
-        ParamByName('CEP').AsString        := Trim(EdtCep.Text);
+        ParamByName('NOME').AsString      := Trim(EdtNome.Text);
+        ParamByName('CPF').AsString       := Trim(EdtCPFCNPJ.Text);
+        ParamByName('TEL').AsString       := Trim(EdtTelefone.Text);
+        ParamByName('EMAIL').AsString     := Trim(EdtEmail.Text);
+        ParamByName('END').AsString       := Trim(EdtEndereco.Text);
+        ParamByName('NUM').AsString       := Trim(EdtNumero.Text);
+        ParamByName('CIDADE').AsString    := Trim(EdtCidade.Text);
+        ParamByName('UF').AsString        := Trim(EdtUF.Text);
+        ParamByName('CEP').AsString       := Trim(EdtCep.Text);
         ParamByName('LOGRADOURO').AsString := Trim(EdtEndereco.Text);
-        ParamByName('FOTO').AsString       := FCaminhoFoto;
+        ParamByName('FOTO').AsString      := FCaminhoFoto;
         ExecSQL;
       end;
       ShowMessage('Cliente cadastrado com sucesso!');
@@ -217,18 +215,18 @@ begin
           'EMAIL = :EMAIL, ENDERECO = :END, NUMERO = :NUM, CIDADE = :CIDADE, ' +
           'UF = :UF, CEP = :CEP, LOGRADOURO = :LOGRADOURO, FOTO = :FOTO ' +
           'WHERE ID = :ID';
-        ParamByName('ID').AsInteger        := StrToInt(EdtCod.Text);
-        ParamByName('NOME').AsString       := Trim(EdtNome.Text);
-        ParamByName('CPF').AsString        := Trim(EdtCPFCNPJ.Text);
-        ParamByName('TEL').AsString        := Trim(EdtTelefone.Text);
-        ParamByName('EMAIL').AsString      := Trim(EdtEmail.Text);
-        ParamByName('END').AsString        := Trim(EdtEndereco.Text);
-        ParamByName('NUM').AsString        := Trim(EdtNumero.Text);
-        ParamByName('CIDADE').AsString     := Trim(EdtCidade.Text);
-        ParamByName('UF').AsString         := Trim(EdtUF.Text);
-        ParamByName('CEP').AsString        := Trim(EdtCep.Text);
+        ParamByName('ID').AsInteger       := StrToInt(EdtCod.Text);
+        ParamByName('NOME').AsString      := Trim(EdtNome.Text);
+        ParamByName('CPF').AsString       := Trim(EdtCPFCNPJ.Text);
+        ParamByName('TEL').AsString       := Trim(EdtTelefone.Text);
+        ParamByName('EMAIL').AsString     := Trim(EdtEmail.Text);
+        ParamByName('END').AsString       := Trim(EdtEndereco.Text);
+        ParamByName('NUM').AsString       := Trim(EdtNumero.Text);
+        ParamByName('CIDADE').AsString    := Trim(EdtCidade.Text);
+        ParamByName('UF').AsString        := Trim(EdtUF.Text);
+        ParamByName('CEP').AsString       := Trim(EdtCep.Text);
         ParamByName('LOGRADOURO').AsString := Trim(EdtEndereco.Text);
-        ParamByName('FOTO').AsString       := FCaminhoFoto;
+        ParamByName('FOTO').AsString      := FCaminhoFoto;
         ExecSQL;
       end;
       ShowMessage('Cliente atualizado com sucesso!');
@@ -250,7 +248,7 @@ begin
   end;
 
   FEditando := True;
-  TirarSnapshot;
+  TirarSnapshot; // grava estado atual para comparar alterações
   AtualizarBotoes;
   EdtNome.SetFocus;
 end;
@@ -264,6 +262,7 @@ begin
   PesqsCliente.ShowModal;
   FreeAndNil(PesqsCliente);
 
+  // Após carregar cliente, ajusta botões
   if Trim(EdtCod.Text) <> '' then
   begin
     FEditando := False;
