@@ -2,7 +2,8 @@ object TelaCompras: TTelaCompras
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  ClientHeight = 505
+  Caption = 'Compras'
+  ClientHeight = 489
   ClientWidth = 897
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -10,14 +11,15 @@ object TelaCompras: TTelaCompras
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
+  Position = poScreenCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   TextHeight = 13
   object PnlFundo: TPanel
     Left = 0
     Top = 0
     Width = 897
-    Height = 505
+    Height = 489
     Align = alClient
     Color = clInactiveCaption
     ParentBackground = False
@@ -113,6 +115,19 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object Label1: TLabel
+      Left = 101
+      Top = 125
+      Width = 220
+      Height = 13
+      Caption = '(Pressione F2 para pesquisar por um Produto)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsItalic]
+      ParentFont = False
+    end
     object PnlDivisao: TPanel
       Left = 0
       Top = 80
@@ -148,6 +163,7 @@ object TelaCompras: TTelaCompras
         Top = 35
         Width = 501
         Height = 322
+        DataSource = DataSource1
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -210,13 +226,16 @@ object TelaCompras: TTelaCompras
       Top = 35
       Width = 161
       Height = 31
+      TabStop = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -19
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
+      ReadOnly = True
       TabOrder = 3
+      OnEnter = BloquearFocoEdit
     end
     object EdVlrUnit: TEdit
       Left = 158
@@ -230,6 +249,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 4
+      OnExit = EdVlrUnitExit
     end
     object EdQuantidade: TEdit
       Left = 24
@@ -243,6 +263,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 5
+      OnExit = EdQuantidadeExit
     end
     object EdProduto: TEdit
       Left = 24
@@ -270,12 +291,14 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 7
+      OnExit = EdDescontoExit
     end
     object EdValorTotal: TEdit
       Left = 24
       Top = 326
       Width = 129
       Height = 31
+      TabStop = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -19
@@ -283,12 +306,14 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 8
+      OnEnter = BloquearFocoEdit
     end
-    object BtnSelecionar: TButton
-      Left = 697
+    object BtnFinaliza: TButton
+      Left = 701
       Top = 429
       Width = 169
       Height = 51
+      Cursor = crHandPoint
       Caption = 'Finalizar'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -297,12 +322,14 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 9
+      OnClick = BtnFinalizarClick
     end
     object BtnAdicionar: TButton
       Left = 232
       Top = 312
       Width = 161
       Height = 45
+      Cursor = crHandPoint
       Caption = 'Adicionar'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -311,12 +338,14 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 10
+      OnClick = BtnAdicionarClick
     end
     object BtnLimpar: TButton
       Left = 28
       Top = 429
       Width = 329
       Height = 51
+      Cursor = crHandPoint
       Caption = 'Limpar'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -325,12 +354,14 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 11
+      OnClick = BtnLimparClick
     end
     object EdTotalCompra: TEdit
-      Left = 591
+      Left = 587
       Top = 363
       Width = 279
       Height = 43
+      TabStop = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -29
@@ -338,6 +369,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 12
+      OnEnter = BloquearFocoEdit
     end
     object DTPData: TDateTimePicker
       Left = 16
@@ -354,5 +386,10 @@ object TelaCompras: TTelaCompras
       ParentFont = False
       TabOrder = 13
     end
+  end
+  object DataSource1: TDataSource
+    DataSet = DataModule1.QryCompras
+    Left = 840
+    Top = 280
   end
 end

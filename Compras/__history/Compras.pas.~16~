@@ -85,7 +85,7 @@ begin
   EdTotalCompra.Text := '0,00';
   EdNumCompra.Text := '';
 
-
+  // Mantendo seus bloqueios
   EdNumCompra.OnEnter := BloquearFocoEdit;
   EdValorTotal.OnEnter := BloquearFocoEdit;
   EdTotalCompra.OnEnter := BloquearFocoEdit;
