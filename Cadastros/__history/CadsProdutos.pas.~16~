@@ -28,6 +28,7 @@ type
     ImgFoto: TImage;
     BtnPesquisar: TButton;
     BtnCarregarFoto: TButton;
+
     procedure FormCreate(Sender: TObject);
     procedure BtnSalvarClick(Sender: TObject);
     procedure BtnEditarClick(Sender: TObject);
@@ -57,13 +58,13 @@ uses PesqProdutos;
 
 procedure TCadProdutos.FormCreate(Sender: TObject);
 begin
-  FEditando    := False;
+  FEditando := False;
   FCaminhoFoto := '';
 
   EDCodigo.ReadOnly := True;
-  EDCodigo.TabStop  := False;
-  EDCodigo.Color    := clBtnFace;
-  EDCodigo.Cursor   := crArrow;
+  EDCodigo.TabStop := False;
+  EDCodigo.Color := clBtnFace;
+  EDCodigo.Cursor := crArrow;
 
   BtnSalvar.Enabled := True;
   BtnEditar.Enabled := False;
@@ -84,10 +85,10 @@ end;
 
 procedure TCadProdutos.HabilitarCampos(Ativo: Boolean);
 begin
-  EdDescricao.Enabled     := Ativo;
-  EDVlrUnit.Enabled       := Ativo;
-  EditMarca.Enabled       := Ativo;
-  EDEstoque.Enabled       := Ativo;
+  EdDescricao.Enabled := Ativo;
+  EDVlrUnit.Enabled := Ativo;
+  EditMarca.Enabled := Ativo;
+  EDEstoque.Enabled := Ativo;
   BtnCarregarFoto.Enabled := Ativo;
 end;
 
@@ -102,7 +103,7 @@ begin
   ImgFoto.Picture := nil;
 
   FCaminhoFoto := '';
-  FEditando    := False;
+  FEditando := False;
 
   BtnSalvar.Enabled := True;
   BtnEditar.Enabled := False;
@@ -159,9 +160,9 @@ begin
     if FEditando then
       ParamByName('ID').AsInteger := StrToInt(EDCodigo.Text);
 
-    ParamByName('DESC').AsString     := EdDescricao.Text;
-    ParamByName('VALOR').AsFloat     := StrToFloat(EDVlrUnit.Text);
-    ParamByName('MARCA').AsString    := EditMarca.Text;
+    ParamByName('DESC').AsString := EdDescricao.Text;
+    ParamByName('VALOR').AsFloat := StrToFloat(EDVlrUnit.Text);
+    ParamByName('MARCA').AsString := EditMarca.Text;
     ParamByName('ESTOQUE').AsInteger := StrToInt(EDEstoque.Text);
 
     if FCaminhoFoto <> '' then
@@ -180,7 +181,7 @@ procedure TCadProdutos.BtnEditarClick(Sender: TObject);
 begin
   if EDCodigo.Text = '' then Exit;
 
-  FEditando         := True;
+  FEditando := True;
   BtnEditar.Enabled := False;
   BtnSalvar.Enabled := True;
 
@@ -195,11 +196,9 @@ end;
 procedure TCadProdutos.BtnPesquisarClick(Sender: TObject);
 begin
   if PesqsProdutos = nil then
-    PesqsProdutos := TPesqsProdutos.Create(Application);
+    PesqsProdutos := TPesqsProdutos.Create(Self);
 
-  PesqsProdutos.CadOrigem := Self;
   PesqsProdutos.ShowModal;
-  FreeAndNil(PesqsProdutos);
 end;
 
 procedure TCadProdutos.BtnCarregarFotoClick(Sender: TObject);
@@ -221,3 +220,4 @@ begin
 end;
 
 end.
+

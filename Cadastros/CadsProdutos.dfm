@@ -196,7 +196,7 @@ object CadProdutos: TCadProdutos
       Height = 21
       TabOrder = 5
     end
-    object BtnPesqNomeCliente: TButton
+    object BtnPesquisar: TButton
       Left = 401
       Top = 97
       Width = 32
@@ -219,7 +219,7 @@ object CadProdutos: TCadProdutos
       Height = 21
       TabOrder = 7
     end
-    object Button1: TButton
+    object BtnCarregarFoto: TButton
       Left = 481
       Top = 192
       Width = 107

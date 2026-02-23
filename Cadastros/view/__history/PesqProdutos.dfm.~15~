@@ -11,8 +11,8 @@
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
+  Position = poScreenCenter
+  OnShow = FormShow
   TextHeight = 13
   object PnlFundo: TPanel
     Left = 0
@@ -23,8 +23,6 @@
     Color = clInactiveCaption
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 592
-    ExplicitHeight = 379
     object LbProdutos: TLabel
       Left = 24
       Top = 10
@@ -52,9 +50,10 @@
       TabOrder = 0
       TitleFont.Charset = DEFAULT_CHARSET
       TitleFont.Color = clWindowText
-      TitleFont.Height = -11
+      TitleFont.Height = -12
       TitleFont.Name = 'Tahoma'
-      TitleFont.Style = []
+      TitleFont.Style = [fsBold]
+      OnDblClick = GridProdutosDblClick
       Columns = <
         item
           Expanded = False
@@ -77,12 +76,12 @@
         item
           Expanded = False
           FieldName = 'Estoque'
-          Width = 62
+          Width = 55
           Visible = True
         end
         item
           Expanded = False
-          FieldName = 'Valor_Unit'
+          FieldName = 'Vlr. Unit.'
           Width = 79
           Visible = True
         end>
@@ -96,13 +95,12 @@
       Color = clGradientInactiveCaption
       ParentBackground = False
       TabOrder = 1
-      ExplicitTop = 337
-      ExplicitWidth = 590
       object BtnSelecionar: TButton
         Left = 432
         Top = 5
         Width = 136
         Height = 31
+        Cursor = crHandPoint
         Caption = 'Selecionar'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -111,6 +109,7 @@
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 0
+        OnClick = BtnSelecionarClick
       end
     end
   end
