@@ -22,6 +22,7 @@ type
   private
     FCadOrigem: TForm;
     procedure PreencherCadastro;
+    procedure ConfigurarGrid;
   public
     property CadOrigem: TForm write FCadOrigem;
   end;
@@ -34,6 +35,53 @@ implementation
 uses CadsCliente;
 
 {$R *.dfm}
+
+procedure TPesqsCliente.ConfigurarGrid;
+begin
+  GridClientes.Columns.Clear;
+
+  with GridClientes.Columns.Add do
+  begin
+    FieldName     := 'ID';
+    Title.Caption := 'Cód.';
+    Width         := 50;
+  end;
+
+  with GridClientes.Columns.Add do
+  begin
+    FieldName     := 'NOME';
+    Title.Caption := 'Nome';
+    Width         := 200;
+  end;
+
+  with GridClientes.Columns.Add do
+  begin
+    FieldName     := 'CPF_CNPJ';
+    Title.Caption := 'CPF/CNPJ';
+    Width         := 120;
+  end;
+
+  with GridClientes.Columns.Add do
+  begin
+    FieldName     := 'TELEFONE';
+    Title.Caption := 'Telefone';
+    Width         := 100;
+  end;
+
+  with GridClientes.Columns.Add do
+  begin
+    FieldName     := 'CIDADE';
+    Title.Caption := 'Cidade';
+    Width         := 130;
+  end;
+
+  with GridClientes.Columns.Add do
+  begin
+    FieldName     := 'UF';
+    Title.Caption := 'UF';
+    Width         := 40;
+  end;
+end;
 
 procedure TPesqsCliente.FormShow(Sender: TObject);
 begin
@@ -51,6 +99,8 @@ begin
         'FROM CLIENTES ORDER BY NOME';
       Open;
     end;
+
+    ConfigurarGrid;
   except
     on E: Exception do
       ShowMessage('Erro ao carregar clientes: ' + E.Message);
@@ -65,7 +115,6 @@ begin
     Exit;
   end;
 
-  // Só preenche o cadastro se foi aberto a partir do CadsCliente
   if not (Assigned(FCadOrigem) and (FCadOrigem is TCadCliente)) then
     Exit;
 

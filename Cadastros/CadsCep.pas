@@ -43,7 +43,6 @@ type
     procedure LimparCampos;
     procedure BuscarCEP(const CEP: string);
   public
-    { Public declarations }
   end;
 
 var
@@ -97,7 +96,6 @@ begin
   EdLogradouro.Clear;
   EdBairro.Clear;
   EdNumero.Clear;
-  EdCEP.SetFocus;
 end;
 
 procedure TCadastroCep.BuscarCEP(const CEP: string);
@@ -129,7 +127,6 @@ begin
         EdCidade.Text     := JSONObj.GetValue<string>('localidade');
         EdBairro.Text     := JSONObj.GetValue<string>('bairro');
 
-        // Seleciona a UF no ComboBox pelo índice
         UF  := JSONObj.GetValue<string>('uf');
         Idx := CbUF.Items.IndexOf(UF);
         if Idx >= 0 then
@@ -181,8 +178,8 @@ begin
 
       SQL.Clear;
       SQL.Text :=
-       'INSERT INTO CEP (CEP, LOGRADOURO, CIDADE, UF, BAIRRO, NUMERO) ' +
-       'VALUES (:CEP, :LOG, :CID, :UF, :BAIRRO, :NUM)';
+        'INSERT INTO CEP (CEP, LOGRADOURO, CIDADE, UF, BAIRRO, NUMERO) ' +
+        'VALUES (:CEP, :LOG, :CID, :UF, :BAIRRO, :NUM)';
       ParamByName('CEP').AsString    := CEP;
       ParamByName('LOG').AsString    := Trim(EdLogradouro.Text);
       ParamByName('CID').AsString    := Trim(EdCidade.Text);
@@ -212,6 +209,7 @@ begin
   if not Assigned(PesqsCeps) then
     PesqsCeps := TPesqsCeps.Create(Application);
   PesqsCeps.ShowModal;
+  FreeAndNil(PesqsCeps);
 end;
 
 procedure TCadastroCep.ImgCepClick(Sender: TObject);
@@ -219,14 +217,11 @@ var
   CEP: string;
 begin
   CEP := Trim(EdCEP.Text);
-
   if CEP = '' then
   begin
     ShowMessage('Digite um CEP válido.');
-    EdCEP.SetFocus;
     Exit;
   end;
-
   BuscarCEP(CEP);
 end;
 
@@ -235,14 +230,11 @@ var
   CEP: string;
 begin
   CEP := Trim(EdCEP.Text);
-
   if CEP = '' then
   begin
     ShowMessage('Digite um CEP válido.');
-    EdCEP.SetFocus;
     Exit;
   end;
-
   BuscarCEP(CEP);
 end;
 

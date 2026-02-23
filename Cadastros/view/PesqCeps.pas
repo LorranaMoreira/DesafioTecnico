@@ -3,9 +3,10 @@ unit PesqCeps;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Data.DB, Vcl.StdCtrls,
-  Vcl.Grids, Vcl.DBGrids, Banco;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Data.DB,
+  Vcl.StdCtrls, Vcl.Grids, Vcl.DBGrids, Banco,
+  FireDAC.Comp.Client, FireDAC.Stan.Param;
 
 type
   TPesqsCeps = class(TForm)
@@ -18,10 +19,12 @@ type
     procedure BtnSelecionarClick(Sender: TObject);
     procedure GridCepsDblClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
   private
+    FQry: TFDQuery;
     procedure PreencherCadastro;
+    procedure ConfigurarGrid;
   public
-    { Public declarations }
   end;
 
 var
@@ -29,27 +32,67 @@ var
 
 implementation
 
-uses
-  CadsCep;
+uses CadsCep;
 
 {$R *.dfm}
+
+procedure TPesqsCeps.ConfigurarGrid;
+begin
+  GridCeps.Columns.Clear;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'CEP';
+    Title.Caption := 'CEP';
+    Width         := 90;
+  end;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'LOGRADOURO';
+    Title.Caption := 'Logradouro';
+    Width         := 200;
+  end;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'CIDADE';
+    Title.Caption := 'Cidade';
+    Width         := 130;
+  end;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'UF';
+    Title.Caption := 'UF';
+    Width         := 40;
+  end;
+end;
 
 procedure TPesqsCeps.FormShow(Sender: TObject);
 begin
   try
-    DataSource1.DataSet := DataModule1.QryCep;
+    GridCeps.DataSource := nil;
+    DataSource1.DataSet := nil;
+
+    if Assigned(FQry) then
+    begin
+      FQry.Close;
+      FQry.Free;
+      FQry := nil;
+    end;
+
+    FQry := TFDQuery.Create(nil);
+    FQry.Connection := DataModule1.FDConnection;
+    FQry.SQL.Text :=
+      'SELECT ID, CEP, LOGRADOURO, CIDADE, UF ' +
+      'FROM CEP ORDER BY CEP';
+    FQry.Open;
+
+    DataSource1.DataSet := FQry;
     GridCeps.DataSource := DataSource1;
 
-    with DataModule1.QryCep do
-    begin
-      Close;
-      SQL.Clear;
-      SQL.Text :=
-        'SELECT ID, CEP, LOGRADOURO, CIDADE, UF ' +
-        'FROM CEP ' +
-        'ORDER BY CEP';
-      Open;
-    end;
+    ConfigurarGrid;
   except
     on E: Exception do
       ShowMessage('Erro ao carregar CEPs: ' + E.Message);
@@ -58,20 +101,22 @@ end;
 
 procedure TPesqsCeps.PreencherCadastro;
 begin
-  if not DataModule1.QryCep.IsEmpty then
+  if (not Assigned(FQry)) or FQry.IsEmpty then
   begin
-    CadastroCep.EdCEP.Text        := DataModule1.QryCep.FieldByName('CEP').AsString;
-    CadastroCep.EdLogradouro.Text := DataModule1.QryCep.FieldByName('LOGRADOURO').AsString;
-    CadastroCep.EdCidade.Text     := DataModule1.QryCep.FieldByName('CIDADE').AsString;
-    CadastroCep.CbUF.Text         := DataModule1.QryCep.FieldByName('UF').AsString;
-  end
-  else
     ShowMessage('Nenhum CEP selecionado.');
+    Exit;
+  end;
+
+  CadastroCep.EdCEP.Text        := FQry.FieldByName('CEP').AsString;
+  CadastroCep.EdLogradouro.Text := FQry.FieldByName('LOGRADOURO').AsString;
+  CadastroCep.EdCidade.Text     := FQry.FieldByName('CIDADE').AsString;
+  CadastroCep.CbUF.Text         := FQry.FieldByName('UF').AsString;
 end;
 
 procedure TPesqsCeps.BtnSelecionarClick(Sender: TObject);
 begin
   PreencherCadastro;
+  ModalResult := mrOk;
 end;
 
 procedure TPesqsCeps.GridCepsDblClick(Sender: TObject);
@@ -79,9 +124,22 @@ begin
   BtnSelecionarClick(Sender);
 end;
 
+procedure TPesqsCeps.FormDestroy(Sender: TObject);
+begin
+  GridCeps.DataSource := nil;
+  DataSource1.DataSet := nil;
+
+  if Assigned(FQry) then
+  begin
+    FQry.Close;
+    FQry.Free;
+    FQry := nil;
+  end;
+end;
+
 procedure TPesqsCeps.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Action := caFree;
+  Action    := caFree;
   PesqsCeps := nil;
 end;
 

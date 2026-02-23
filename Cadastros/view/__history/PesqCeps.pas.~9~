@@ -1,0 +1,139 @@
+unit PesqCeps;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Data.DB,
+  Vcl.StdCtrls, Vcl.Grids, Vcl.DBGrids, Banco,
+  FireDAC.Comp.Client, FireDAC.Stan.Param;
+
+type
+  TPesqsCeps = class(TForm)
+    PnlFundo: TPanel;
+    BtnSelecionar: TButton;
+    GridCeps: TDBGrid;
+    DataSource1: TDataSource;
+    LbCeps: TLabel;
+    procedure FormShow(Sender: TObject);
+    procedure BtnSelecionarClick(Sender: TObject);
+    procedure GridCepsDblClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    FQry: TFDQuery;
+    procedure PreencherCadastro;
+    procedure ConfigurarGrid;
+  public
+  end;
+
+var
+  PesqsCeps: TPesqsCeps;
+
+implementation
+
+uses CadsCep;
+
+{$R *.dfm}
+
+procedure TPesqsCeps.ConfigurarGrid;
+begin
+  GridCeps.Columns.Clear;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'CEP';
+    Title.Caption := 'CEP';
+    Width         := 90;
+  end;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'LOGRADOURO';
+    Title.Caption := 'Logradouro';
+    Width         := 200;
+  end;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'CIDADE';
+    Title.Caption := 'Cidade';
+    Width         := 130;
+  end;
+
+  with GridCeps.Columns.Add do
+  begin
+    FieldName     := 'UF';
+    Title.Caption := 'UF';
+    Width         := 40;
+  end;
+end;
+
+procedure TPesqsCeps.FormShow(Sender: TObject);
+begin
+  try
+    if Assigned(FQry) then
+    begin
+      GridCeps.DataSource := nil;
+      DataSource1.DataSet := nil;
+      FQry.Free;
+      FQry := nil;
+    end;
+
+    FQry := TFDQuery.Create(Self);
+    FQry.Connection := DataModule1.FDConnection;
+    FQry.SQL.Text :=
+      'SELECT ID, CEP, LOGRADOURO, CIDADE, UF ' +
+      'FROM CEP ORDER BY CEP';
+    FQry.Open;
+
+    DataSource1.DataSet := FQry;
+    GridCeps.DataSource := DataSource1;
+
+    ConfigurarGrid;
+  except
+    on E: Exception do
+      ShowMessage('Erro ao carregar CEPs: ' + E.Message);
+  end;
+end;
+
+procedure TPesqsCeps.PreencherCadastro;
+begin
+  if (not Assigned(FQry)) or FQry.IsEmpty then
+  begin
+    ShowMessage('Nenhum CEP selecionado.');
+    Exit;
+  end;
+
+  CadastroCep.EdCEP.Text        := FQry.FieldByName('CEP').AsString;
+  CadastroCep.EdLogradouro.Text := FQry.FieldByName('LOGRADOURO').AsString;
+  CadastroCep.EdCidade.Text     := FQry.FieldByName('CIDADE').AsString;
+  CadastroCep.CbUF.Text         := FQry.FieldByName('UF').AsString;
+end;
+
+procedure TPesqsCeps.BtnSelecionarClick(Sender: TObject);
+begin
+  PreencherCadastro;
+  ModalResult := mrOk;
+end;
+
+procedure TPesqsCeps.GridCepsDblClick(Sender: TObject);
+begin
+  BtnSelecionarClick(Sender);
+end;
+
+procedure TPesqsCeps.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  GridCeps.DataSource := nil;
+  DataSource1.DataSet := nil;
+
+  if Assigned(FQry) then
+  begin
+    FQry.Free;
+    FQry := nil;
+  end;
+
+  Action    := caFree;
+  PesqsCeps := nil;
+end;
+
+end.

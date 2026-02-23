@@ -13,6 +13,7 @@
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object PnlFundo: TPanel
@@ -68,6 +69,7 @@
       Top = 48
       Width = 529
       Height = 257
+      DataSource = DataSource1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11

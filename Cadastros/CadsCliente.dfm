@@ -11,7 +11,9 @@ object CadCliente: TCadCliente
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
+  PixelsPerInch = 96
   TextHeight = 13
   object PnlDadosPessoais: TPanel
     Left = 0
@@ -203,6 +205,7 @@ object CadCliente: TCadCliente
       Width = 291
       Height = 22
       TabOrder = 2
+      OnChange = CampoAlterado
     end
     object EdtCPFCNPJ: TEdit
       Left = 86
@@ -210,13 +213,15 @@ object CadCliente: TCadCliente
       Width = 154
       Height = 22
       TabOrder = 3
+      OnChange = CampoAlterado
     end
     object EdtTelefone: TEdit
       Left = 312
-      Top = 86
+      Top = 84
       Width = 159
       Height = 22
       TabOrder = 4
+      OnChange = CampoAlterado
     end
     object EdtEmail: TEdit
       Left = 65
@@ -224,6 +229,7 @@ object CadCliente: TCadCliente
       Width = 288
       Height = 22
       TabOrder = 5
+      OnChange = CampoAlterado
     end
     object EdtUF: TEdit
       Left = 218
@@ -231,6 +237,7 @@ object CadCliente: TCadCliente
       Width = 49
       Height = 22
       TabOrder = 6
+      OnChange = CampoAlterado
     end
     object PnlRodape: TPanel
       Left = 1
@@ -296,6 +303,7 @@ object CadCliente: TCadCliente
       Width = 283
       Height = 22
       TabOrder = 8
+      OnChange = CampoAlterado
     end
     object EdtNumero: TEdit
       Left = 409
@@ -303,6 +311,7 @@ object CadCliente: TCadCliente
       Width = 68
       Height = 22
       TabOrder = 9
+      OnChange = CampoAlterado
     end
     object EdtCidade: TEdit
       Left = 342
@@ -310,6 +319,7 @@ object CadCliente: TCadCliente
       Width = 134
       Height = 22
       TabOrder = 10
+      OnChange = CampoAlterado
     end
     object EdtCep: TEdit
       Left = 50
@@ -317,6 +327,7 @@ object CadCliente: TCadCliente
       Width = 112
       Height = 22
       TabOrder = 11
+      OnChange = CampoAlterado
     end
     object PnlEnunciadoEndereco: TPanel
       Left = 1

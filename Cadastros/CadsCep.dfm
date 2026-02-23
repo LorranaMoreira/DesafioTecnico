@@ -362,9 +362,9 @@
         OnClick = BtnLimparClick
       end
       object BtnBuscar: TButton
-        Left = 344
+        Left = 328
         Top = 5
-        Width = 95
+        Width = 111
         Height = 25
         Cursor = crHandPoint
         Caption = 'Lista de CEPs'
@@ -452,7 +452,7 @@
   object TRESTClient: TRESTClient
     BaseURL = 'https://viacep.com.br/ws/'
     Params = <>
-    Left = 120
+    Left = 112
     Top = 224
   end
   object RESTRequest1: TRESTRequest
@@ -460,11 +460,11 @@
     Params = <>
     Response = RESTResponse1
     SynchronizedEvents = False
-    Left = 200
+    Left = 184
     Top = 224
   end
   object RESTResponse1: TRESTResponse
-    Left = 288
+    Left = 264
     Top = 224
   end
 end
