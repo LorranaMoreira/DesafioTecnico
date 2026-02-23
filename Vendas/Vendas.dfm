@@ -299,6 +299,7 @@ object TelaVendas: TTelaVendas
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 6
+      OnChange = EdQuantidadeChange
     end
     object EdProduto: TEdit
       Left = 24
@@ -326,6 +327,7 @@ object TelaVendas: TTelaVendas
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 8
+      OnChange = EdDescItemChange
     end
     object EdVlrTotalItem: TEdit
       Left = 24

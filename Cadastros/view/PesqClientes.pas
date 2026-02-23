@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.StdCtrls,
-  Vcl.Grids, Vcl.DBGrids, Vcl.ExtCtrls, Vendas, Banco;
+  Vcl.Grids, Vcl.DBGrids, Vcl.ExtCtrls, Banco;
 
 type
   TPesqsCliente = class(TForm)
@@ -15,14 +15,15 @@ type
     PnlRodape: TPanel;
     BntSelecionar: TButton;
     DataSource1: TDataSource;
-
     procedure FormShow(Sender: TObject);
     procedure BntSelecionarClick(Sender: TObject);
     procedure GridClientesDblClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    FCadOrigem: TForm;
     procedure PreencherCadastro;
   public
+    property CadOrigem: TForm write FCadOrigem;
   end;
 
 var
@@ -37,7 +38,7 @@ uses CadsCliente;
 procedure TPesqsCliente.FormShow(Sender: TObject);
 begin
   try
-    DataSource1.DataSet := DataModule1.QryClientes;
+    DataSource1.DataSet     := DataModule1.QryClientes;
     GridClientes.DataSource := DataSource1;
 
     with DataModule1.QryClientes do
@@ -45,7 +46,8 @@ begin
       Close;
       SQL.Clear;
       SQL.Text :=
-        'SELECT ID, NOME, CPF_CNPJ, TELEFONE, EMAIL, ENDERECO, NUMERO, CIDADE, UF, CEP, FOTO ' +
+        'SELECT ID, NOME, CPF_CNPJ, TELEFONE, EMAIL, ENDERECO, NUMERO, ' +
+        'CIDADE, UF, CEP, FOTO ' +
         'FROM CLIENTES ORDER BY NOME';
       Open;
     end;
@@ -57,40 +59,49 @@ end;
 
 procedure TPesqsCliente.PreencherCadastro;
 begin
-  if not DataModule1.QryClientes.IsEmpty then
+  if DataModule1.QryClientes.IsEmpty then
   begin
-    CadCliente.EdtCod.Text      := DataModule1.QryClientes.FieldByName('ID').AsString;
-    CadCliente.EdtNome.Text     := DataModule1.QryClientes.FieldByName('NOME').AsString;
-    CadCliente.EdtCPFCNPJ.Text  := DataModule1.QryClientes.FieldByName('CPF_CNPJ').AsString;
-    CadCliente.EdtTelefone.Text := DataModule1.QryClientes.FieldByName('TELEFONE').AsString;
-    CadCliente.EdtEmail.Text    := DataModule1.QryClientes.FieldByName('EMAIL').AsString;
-    CadCliente.EdtCep.Text      := DataModule1.QryClientes.FieldByName('CEP').AsString;
-    CadCliente.EdtUF.Text       := DataModule1.QryClientes.FieldByName('UF').AsString;
-    CadCliente.EdtCidade.Text   := DataModule1.QryClientes.FieldByName('CIDADE').AsString;
-    CadCliente.EdtEndereco.Text := DataModule1.QryClientes.FieldByName('ENDERECO').AsString;
-    CadCliente.EdtNumero.Text   := DataModule1.QryClientes.FieldByName('NUMERO').AsString;
+    ShowMessage('Nenhum cliente selecionado.');
+    Exit;
+  end;
+
+  // Só preenche o cadastro se foi aberto a partir do CadsCliente
+  if not (Assigned(FCadOrigem) and (FCadOrigem is TCadCliente)) then
+    Exit;
+
+  with TCadCliente(FCadOrigem) do
+  begin
+    EdtCod.Text      := DataModule1.QryClientes.FieldByName('ID').AsString;
+    EdtNome.Text     := DataModule1.QryClientes.FieldByName('NOME').AsString;
+    EdtCPFCNPJ.Text  := DataModule1.QryClientes.FieldByName('CPF_CNPJ').AsString;
+    EdtTelefone.Text := DataModule1.QryClientes.FieldByName('TELEFONE').AsString;
+    EdtEmail.Text    := DataModule1.QryClientes.FieldByName('EMAIL').AsString;
+    EdtCep.Text      := DataModule1.QryClientes.FieldByName('CEP').AsString;
+    EdtUF.Text       := DataModule1.QryClientes.FieldByName('UF').AsString;
+    EdtCidade.Text   := DataModule1.QryClientes.FieldByName('CIDADE').AsString;
+    EdtEndereco.Text := DataModule1.QryClientes.FieldByName('ENDERECO').AsString;
+    EdtNumero.Text   := DataModule1.QryClientes.FieldByName('NUMERO').AsString;
 
     if Trim(DataModule1.QryClientes.FieldByName('FOTO').AsString) <> '' then
     begin
       try
-        CadCliente.ImgFotoCliente.Picture.LoadFromFile(DataModule1.QryClientes.FieldByName('FOTO').AsString);
-        CadCliente.ImgFotoCliente.Stretch := True;
+        ImgFotoCliente.Picture.LoadFromFile(
+          DataModule1.QryClientes.FieldByName('FOTO').AsString);
+        ImgFotoCliente.Stretch := True;
       except
         on E: Exception do
           ShowMessage('Não foi possível carregar a foto: ' + E.Message);
       end;
     end;
 
-    CadCliente.FEditando := False;
-  end
-  else
-    ShowMessage('Nenhum cliente selecionado.');
+    FEditando := False;
+  end;
 end;
 
 procedure TPesqsCliente.BntSelecionarClick(Sender: TObject);
 begin
   PreencherCadastro;
-  ModalResult := mrOk;  // Fecha a tela
+  ModalResult := mrOk;
 end;
 
 procedure TPesqsCliente.GridClientesDblClick(Sender: TObject);
@@ -100,8 +111,10 @@ end;
 
 procedure TPesqsCliente.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Action := caFree;
-  PesqsCliente := nil;
+  GridClientes.DataSource := nil;
+  DataSource1.DataSet     := nil;
+  DataModule1.QryClientes.Close;
+  Action := caHide;
 end;
 
 end.

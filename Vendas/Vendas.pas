@@ -1,5 +1,5 @@
 ﻿unit Vendas;
-
+
 interface
 
 uses
@@ -39,7 +39,6 @@ type
     DSVendas: TDataSource;
     Label1: TLabel;
     Label2: TLabel;
-
     procedure FormCreate(Sender: TObject);
     procedure BtnAdicionarClick(Sender: TObject);
     procedure BtnLimparClick(Sender: TObject);
@@ -50,8 +49,10 @@ type
     procedure BloquearFocoEdit(Sender: TObject);
     procedure BloquearCliqueEdit(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-
+    procedure EdQuantidadeChange(Sender: TObject);
+    procedure EdDescItemChange(Sender: TObject);
   private
+    FIDProdutoAtual: Integer;
     procedure CalcularTotalItem;
     procedure AtualizarTotalVenda;
     function ValidarItem: Boolean;
@@ -60,12 +61,9 @@ type
     procedure CarregarItens;
     procedure ConfigurarGrid;
     procedure LimparTela;
-
-    // CONTROLE DE ESTOQUE
     function VerificarEstoque: Boolean;
     procedure BaixarEstoque;
-    procedure DevolverEstoque(Qtd: Integer; Produto: String);
-
+    procedure DevolverEstoque(Qtd: Integer; IDProduto: Integer);
   public
   end;
 
@@ -82,28 +80,38 @@ uses PesqClientes, PesqProdutos;
 
 function TTelaVendas.VerificarEstoque: Boolean;
 var
-  EstoqueAtual: Integer;
+  EstoqueAtual, QtdSolicitada: Integer;
 begin
   Result := False;
+
+  QtdSolicitada := StrToIntDef(EdQuantidade.Text, 0);
+
+  if FIDProdutoAtual <= 0 then
+  begin
+    ShowMessage('Selecione um produto válido.');
+    Exit;
+  end;
 
   with DataModule1.QryProdutos do
   begin
     Close;
-    SQL.Text := 'SELECT ESTOQUE FROM PRODUTOS WHERE DESCRICAO = :PROD';
-    ParamByName('PROD').AsString := EdProduto.Text;
+    SQL.Text := 'SELECT ESTOQUE FROM PRODUTOS WHERE ID = :ID';
+    ParamByName('ID').AsInteger := FIDProdutoAtual;
     Open;
 
     if IsEmpty then
     begin
       ShowMessage('Produto não encontrado.');
+      Close;
       Exit;
     end;
 
     EstoqueAtual := FieldByName('ESTOQUE').AsInteger;
+    Close;
 
-    if EstoqueAtual < StrToIntDef(EdQuantidade.Text,0) then
+    if EstoqueAtual < QtdSolicitada then
     begin
-      ShowMessage('Estoque insuficiente.');
+      ShowMessage('Estoque insuficiente. Disponível: ' + IntToStr(EstoqueAtual));
       Exit;
     end;
   end;
@@ -117,37 +125,36 @@ begin
   begin
     Close;
     SQL.Text :=
-      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD ' +
-      'WHERE DESCRICAO = :PROD';
-    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text,0);
-    ParamByName('PROD').AsString := EdProduto.Text;
+      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD WHERE ID = :ID';
+    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text, 0);
+    ParamByName('ID').AsInteger  := FIDProdutoAtual;
     ExecSQL;
   end;
 end;
 
-procedure TTelaVendas.DevolverEstoque(Qtd: Integer; Produto: String);
+procedure TTelaVendas.DevolverEstoque(Qtd: Integer; IDProduto: Integer);
 begin
   with DataModule1.QryProdutos do
   begin
     Close;
     SQL.Text :=
-      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD ' +
-      'WHERE DESCRICAO = :PROD';
+      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD WHERE ID = :ID';
     ParamByName('QTD').AsInteger := Qtd;
-    ParamByName('PROD').AsString := Produto;
+    ParamByName('ID').AsInteger  := IDProduto;
     ExecSQL;
   end;
 end;
 
-{ ================= SEU CÓDIGO ORIGINAL ================= }
+{ ================= FORM ================= }
 
 procedure TTelaVendas.FormCreate(Sender: TObject);
 begin
-  DTPData.Date := Date;
-  EdTotalVenda.Text := '0,00';
+  DTPData.Date         := Date;
+  EdTotalVenda.Text    := '0,00';
   BtnFinalizar.Enabled := False;
+  FIDProdutoAtual      := 0;
 
-  DSVendas.DataSet := DataModule1.QryItensVenda;
+  DSVendas.DataSet      := DataModule1.QryItensVenda;
   GridVendas.DataSource := DSVendas;
 
   ConfigurarGrid;
@@ -162,9 +169,10 @@ begin
   EdVlrUnit.Clear;
   EdDescItem.Clear;
   EdVlrTotalItem.Clear;
-  EdTotalVenda.Text := '0,00';
-  DTPData.Date := Date;
+  EdTotalVenda.Text    := '0,00';
+  DTPData.Date         := Date;
   BtnFinalizar.Enabled := False;
+  FIDProdutoAtual      := 0;
 
   DataModule1.QryItensVenda.Close;
 end;
@@ -179,11 +187,12 @@ begin
     EdNumVenda.Text := FieldByName('PROXIMO').AsString;
 
     Close;
-    SQL.Text := 'INSERT INTO VENDAS (ID, DATA, CLIENTE, TOTAL) ' +
-                'VALUES (:ID, :DATA, :CLI, :TOTAL)';
-    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text, 0);
-    ParamByName('DATA').AsDate := DTPData.Date;
-    ParamByName('CLI').AsString := EdNomeCliente.Text;
+    SQL.Text :=
+      'INSERT INTO VENDAS (ID, DATA, CLIENTE, TOTAL) ' +
+      'VALUES (:ID, :DATA, :CLI, :TOTAL)';
+    ParamByName('ID').AsInteger  := StrToIntDef(EdNumVenda.Text, 0);
+    ParamByName('DATA').AsDate   := DTPData.Date;
+    ParamByName('CLI').AsString  := EdNomeCliente.Text;
     ParamByName('TOTAL').AsFloat := 0;
     ExecSQL;
   end;
@@ -197,7 +206,7 @@ begin
     SQL.Text :=
       'SELECT ID, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL ' +
       'FROM ITENS_VENDA WHERE NUM_VENDA = :ID';
-    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text,0);
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text, 0);
     Open;
   end;
 end;
@@ -207,16 +216,34 @@ var
   Qtd: Integer;
   VlrUnit, Desc, Total: Double;
 begin
-  Qtd := StrToIntDef(EdQuantidade.Text, 0);
+  Qtd     := StrToIntDef(EdQuantidade.Text, 0);
   VlrUnit := StrToFloatDef(EdVlrUnit.Text, 0);
-  Desc := StrToFloatDef(EdDescItem.Text, 0);
+  Desc    := StrToFloatDef(EdDescItem.Text, 0);
+
+  if Desc < 0    then Desc    := 0;
+  if VlrUnit < 0 then VlrUnit := 0;
+  if Qtd < 0     then Qtd     := 0;
 
   Total := Qtd * (VlrUnit - Desc);
+  if Total < 0 then Total := 0;
 
   EdVlrTotalItem.Text := FormatFloat('0.00', Total);
 end;
 
+procedure TTelaVendas.EdQuantidadeChange(Sender: TObject);
+begin
+  CalcularTotalItem;
+end;
+
+procedure TTelaVendas.EdDescItemChange(Sender: TObject);
+begin
+  CalcularTotalItem;
+end;
+
 function TTelaVendas.ValidarItem: Boolean;
+var
+  Qtd: Integer;
+  Desc, VlrUnit: Double;
 begin
   Result := False;
 
@@ -232,9 +259,30 @@ begin
     Exit;
   end;
 
-  if StrToIntDef(EdQuantidade.Text, 0) <= 0 then
+  Qtd := StrToIntDef(EdQuantidade.Text, -1);
+  if Qtd <= 0 then
   begin
     ShowMessage('Quantidade deve ser maior que zero.');
+    Exit;
+  end;
+
+  VlrUnit := StrToFloatDef(EdVlrUnit.Text, -1);
+  if VlrUnit < 0 then
+  begin
+    ShowMessage('Valor unitário inválido.');
+    Exit;
+  end;
+
+  Desc := StrToFloatDef(EdDescItem.Text, -1);
+  if Desc < 0 then
+  begin
+    ShowMessage('Desconto não pode ser negativo.');
+    Exit;
+  end;
+
+  if Desc > VlrUnit then
+  begin
+    ShowMessage('Desconto não pode ser maior que o valor unitário.');
     Exit;
   end;
 
@@ -244,14 +292,12 @@ end;
 procedure TTelaVendas.BtnAdicionarClick(Sender: TObject);
 begin
   if not ValidarItem then Exit;
-
   if not VerificarEstoque then Exit;
 
   if Trim(EdNumVenda.Text) = '' then
     GerarVendaInicial;
 
   CalcularTotalItem;
-
   BaixarEstoque;
 
   with DataModule1.QryItensVenda do
@@ -260,19 +306,18 @@ begin
     SQL.Text :=
       'INSERT INTO ITENS_VENDA (NUM_VENDA, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL) ' +
       'VALUES (:ID, :PROD, :QTD, :UNIT, :DESC, :TOTAL)';
-    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text,0);
+    ParamByName('ID').AsInteger  := StrToIntDef(EdNumVenda.Text, 0);
     ParamByName('PROD').AsString := EdProduto.Text;
-    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text,0);
-    ParamByName('UNIT').AsFloat := StrToFloatDef(EdVlrUnit.Text,0);
-    ParamByName('DESC').AsFloat := StrToFloatDef(EdDescItem.Text,0);
-    ParamByName('TOTAL').AsFloat := StrToFloatDef(EdVlrTotalItem.Text,0);
+    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text, 0);
+    ParamByName('UNIT').AsFloat  := StrToFloatDef(EdVlrUnit.Text, 0);
+    ParamByName('DESC').AsFloat  := StrToFloatDef(EdDescItem.Text, 0);
+    ParamByName('TOTAL').AsFloat := StrToFloatDef(EdVlrTotalItem.Text, 0);
     ExecSQL;
   end;
 
   CarregarItens;
   AtualizarTotalVenda;
   AtualizarStatusFinalizar;
-
   BtnLimparClick(nil);
 end;
 
@@ -284,7 +329,7 @@ begin
     SQL.Text :=
       'SELECT COALESCE(SUM(VL_TOTAL),0) AS TOTAL ' +
       'FROM ITENS_VENDA WHERE NUM_VENDA = :NUM_VENDA';
-    ParamByName('NUM_VENDA').AsInteger := StrToIntDef(EdNumVenda.Text,0);
+    ParamByName('NUM_VENDA').AsInteger := StrToIntDef(EdNumVenda.Text, 0);
     Open;
     EdTotalVenda.Text := FormatFloat('0.00', FieldByName('TOTAL').AsFloat);
   end;
@@ -302,6 +347,7 @@ begin
   EdVlrUnit.Clear;
   EdDescItem.Clear;
   EdVlrTotalItem.Clear;
+  FIDProdutoAtual := 0;
 end;
 
 procedure TTelaVendas.BtnFinalizarClick(Sender: TObject);
@@ -311,11 +357,12 @@ begin
   with DataModule1.QryVendas do
   begin
     Close;
-    SQL.Text := 'UPDATE VENDAS SET DATA = :DATA, CLIENTE = :CLI, TOTAL = :TOTAL ' +
-                'WHERE ID = :ID';
-    ParamByName('ID').AsInteger := StrToIntDef(EdNumVenda.Text, 0);
-    ParamByName('DATA').AsDate := DTPData.Date;
-    ParamByName('CLI').AsString := EdNomeCliente.Text;
+    SQL.Text :=
+      'UPDATE VENDAS SET DATA = :DATA, CLIENTE = :CLI, TOTAL = :TOTAL ' +
+      'WHERE ID = :ID';
+    ParamByName('ID').AsInteger  := StrToIntDef(EdNumVenda.Text, 0);
+    ParamByName('DATA').AsDate   := DTPData.Date;
+    ParamByName('CLI').AsString  := EdNomeCliente.Text;
     ParamByName('TOTAL').AsFloat := StrToFloatDef(EdTotalVenda.Text, 0);
     ExecSQL;
   end;
@@ -326,18 +373,27 @@ end;
 
 procedure TTelaVendas.GridVendasDblClick(Sender: TObject);
 var
-  IDItem, QtdItem: Integer;
-  ProdutoItem: String;
+  IDItem, QtdItem, IDProduto: Integer;
 begin
   if DataModule1.QryItensVenda.IsEmpty then Exit;
 
   if MessageDlg('Excluir item?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
-    IDItem := DataModule1.QryItensVenda.FieldByName('ID').AsInteger;
+    IDItem  := DataModule1.QryItensVenda.FieldByName('ID').AsInteger;
     QtdItem := DataModule1.QryItensVenda.FieldByName('QTD').AsInteger;
-    ProdutoItem := DataModule1.QryItensVenda.FieldByName('PRODUTO').AsString;
 
-    DevolverEstoque(QtdItem, ProdutoItem);
+    with DataModule1.QryProdutos do
+    begin
+      Close;
+      SQL.Text := 'SELECT ID FROM PRODUTOS WHERE DESCRICAO = :PROD';
+      ParamByName('PROD').AsString :=
+        DataModule1.QryItensVenda.FieldByName('PRODUTO').AsString;
+      Open;
+      IDProduto := FieldByName('ID').AsInteger;
+      Close;
+    end;
+
+    DevolverEstoque(QtdItem, IDProduto);
 
     with DataModule1.QryItensVenda do
     begin
@@ -359,74 +415,75 @@ begin
 
   with GridVendas.Columns.Add do
   begin
-    FieldName := 'PRODUTO';
+    FieldName     := 'PRODUTO';
     Title.Caption := 'Produto';
-    Width := 200;
+    Width         := 200;
   end;
 
   with GridVendas.Columns.Add do
   begin
-    FieldName := 'QTD';
+    FieldName     := 'QTD';
     Title.Caption := 'Quant.';
-    Width := 60;
+    Width         := 60;
   end;
 
   with GridVendas.Columns.Add do
   begin
-    FieldName := 'VL_UNIT';
+    FieldName     := 'VL_UNIT';
     Title.Caption := 'Vlr Unit.';
-    Width := 80;
+    Width         := 80;
   end;
 
   with GridVendas.Columns.Add do
   begin
-    FieldName := 'DESC_ITEM';
+    FieldName     := 'DESC_ITEM';
     Title.Caption := 'Desc.';
-    Width := 60;
+    Width         := 60;
   end;
 
   with GridVendas.Columns.Add do
   begin
-    FieldName := 'VL_TOTAL';
+    FieldName     := 'VL_TOTAL';
     Title.Caption := 'Total';
-    Width := 80;
+    Width         := 80;
   end;
 end;
 
-procedure TTelaVendas.EdNomeClienteKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  FormPesq: TPesqsCliente;
+procedure TTelaVendas.EdNomeClienteKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
   if Key = VK_F2 then
   begin
-    FormPesq := TPesqsCliente.Create(Self);
-    try
-      if FormPesq.ShowModal = mrOk then
-        if not DataModule1.QryClientes.IsEmpty then
-          EdNomeCliente.Text := DataModule1.QryClientes.FieldByName('NOME').AsString;
-    finally
-      FormPesq.Free;
-    end;
+    if PesqsCliente = nil then
+      PesqsCliente := TPesqsCliente.Create(Application);
+
+    if PesqsCliente.ShowModal = mrOk then
+      if not DataModule1.QryClientes.IsEmpty then
+        EdNomeCliente.Text := DataModule1.QryClientes.FieldByName('NOME').AsString;
+
+    FreeAndNil(PesqsCliente);
   end;
 end;
 
-procedure TTelaVendas.EdProdutoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  FormPesq: TPesqsProdutos;
+procedure TTelaVendas.EdProdutoKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
   if Key = VK_F2 then
   begin
-    FormPesq := TPesqsProdutos.Create(Self);
-    try
-      if FormPesq.ShowModal = mrOk then
-        if not DataModule1.QryProdutos.IsEmpty then
-        begin
-          EdProduto.Text := DataModule1.QryProdutos.FieldByName('DESCRICAO').AsString;
-          EdQuantidade.SetFocus;
-        end;
-    finally
-      FormPesq.Free;
-    end;
+    if PesqsProdutos = nil then
+      PesqsProdutos := TPesqsProdutos.Create(Application);
+
+    if PesqsProdutos.ShowModal = mrOk then
+      if not DataModule1.QryProdutos.IsEmpty then
+      begin
+        EdProduto.Text  := DataModule1.QryProdutos.FieldByName('DESCRICAO').AsString;
+        EdVlrUnit.Text  := FormatFloat('0.00',
+          DataModule1.QryProdutos.FieldByName('VALOR_UNITARIO').AsFloat);
+        FIDProdutoAtual := DataModule1.QryProdutos.FieldByName('ID').AsInteger;
+        EdQuantidade.SetFocus;
+      end;
+
+    FreeAndNil(PesqsProdutos);
   end;
 end;
 
@@ -442,4 +499,4 @@ begin
 end;
 
 end.
-
+

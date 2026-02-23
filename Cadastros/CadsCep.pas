@@ -181,12 +181,14 @@ begin
 
       SQL.Clear;
       SQL.Text :=
-        'INSERT INTO CEP (CEP, LOGRADOURO, CIDADE, UF) ' +
-        'VALUES (:CEP, :LOG, :CID, :UF)';
-      ParamByName('CEP').AsString := CEP;
-      ParamByName('LOG').AsString := Trim(EdLogradouro.Text);
-      ParamByName('CID').AsString := Trim(EdCidade.Text);
-      ParamByName('UF').AsString  := Trim(CbUF.Text);
+       'INSERT INTO CEP (CEP, LOGRADOURO, CIDADE, UF, BAIRRO, NUMERO) ' +
+       'VALUES (:CEP, :LOG, :CID, :UF, :BAIRRO, :NUM)';
+      ParamByName('CEP').AsString    := CEP;
+      ParamByName('LOG').AsString    := Trim(EdLogradouro.Text);
+      ParamByName('CID').AsString    := Trim(EdCidade.Text);
+      ParamByName('UF').AsString     := Trim(CbUF.Text);
+      ParamByName('BAIRRO').AsString := Trim(EdBairro.Text);
+      ParamByName('NUM').AsInteger   := StrToIntDef(Trim(EdNumero.Text), 0);
       ExecSQL;
     end;
 
