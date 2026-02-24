@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Data.DB, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.DBGrids,
-  Vcl.ExtCtrls, Banco, Datasnap.DBClient;
+  Vcl.ExtCtrls, Banco;
 
 type
   TTelaCompras = class(TForm)
@@ -36,28 +36,21 @@ type
     EdTotalCompra: TEdit;
     DTPData: TDateTimePicker;
     DataSource1: TDataSource;
-    Label1: TLabel;
-
+    LbInformacao: TLabel;
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure BtnAdicionarClick(Sender: TObject);
     procedure BtnLimparClick(Sender: TObject);
     procedure BtnFinalizarClick(Sender: TObject);
     procedure EdProdutoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure GridComprasDblClick(Sender: TObject);
-    procedure EdQuantidadeExit(Sender: TObject);
-    procedure EdVlrUnitExit(Sender: TObject);
-    procedure EdDescontoExit(Sender: TObject);
+    procedure EdQuantidadeChange(Sender: TObject);
+    procedure EdVlrUnitChange(Sender: TObject);
+    procedure EdDescontoChange(Sender: TObject);
     procedure BloquearFocoEdit(Sender: TObject);
     procedure BloquearCliqueEdit(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-
   private
-    CDSItens: TClientDataSet;
-    DSItens: TDataSource;
-    CodigoProduto: Integer;
-
-    procedure CriarDataSetTemporario;
+    FIDProdutoAtual: Integer;
     procedure ConfigurarGrid;
     procedure GerarNumeroCompra;
     procedure CalcularTotalItem;
@@ -66,7 +59,9 @@ type
     function ValidarItem: Boolean;
     procedure LimparCamposProduto;
     procedure LimparTodaTela;
-
+    procedure CarregarItens;
+    procedure AumentarEstoque;
+    procedure DevolverEstoque(Qtd: Integer; IDProduto: Integer);
   public
   end;
 
@@ -81,49 +76,16 @@ uses PesqProdutos;
 
 procedure TTelaCompras.FormCreate(Sender: TObject);
 begin
-  DTPData.Date := Date;
-  EdTotalCompra.Text := '0,00';
-  EdNumCompra.Text := '';
-
-
-  EdNumCompra.OnEnter := BloquearFocoEdit;
-  EdValorTotal.OnEnter := BloquearFocoEdit;
-  EdTotalCompra.OnEnter := BloquearFocoEdit;
-
-  EdNumCompra.OnMouseDown := BloquearCliqueEdit;
-  EdValorTotal.OnMouseDown := BloquearCliqueEdit;
-  EdTotalCompra.OnMouseDown := BloquearCliqueEdit;
-
+  DTPData.Date         := Date;
+  EdTotalCompra.Text   := '0,00';
+  EdNumCompra.Text     := '';
   BtnFinalizar.Enabled := False;
+  FIDProdutoAtual      := 0;
 
-  CriarDataSetTemporario;
+  DataSource1.DataSet      := DataModule1.QryItensCompra;
+  GridCompras.DataSource   := DataSource1;
+
   ConfigurarGrid;
-end;
-
-procedure TTelaCompras.FormDestroy(Sender: TObject);
-begin
-  CDSItens.Free;
-  DSItens.Free;
-end;
-
-procedure TTelaCompras.CriarDataSetTemporario;
-begin
-  CDSItens := TClientDataSet.Create(Self);
-
-  with CDSItens do
-  begin
-    FieldDefs.Add('PRODUTO', ftString, 150);
-    FieldDefs.Add('QTD', ftInteger);
-    FieldDefs.Add('VL_UNIT', ftFloat);
-    FieldDefs.Add('DESC_ITEM', ftFloat);
-    FieldDefs.Add('VL_TOTAL', ftFloat);
-    CreateDataSet;
-  end;
-
-  DSItens := TDataSource.Create(Self);
-  DSItens.DataSet := CDSItens;
-
-  GridCompras.DataSource := DSItens;
 end;
 
 procedure TTelaCompras.ConfigurarGrid;
@@ -132,37 +94,37 @@ begin
 
   with GridCompras.Columns.Add do
   begin
-    FieldName := 'PRODUTO';
+    FieldName     := 'PRODUTO';
     Title.Caption := 'Produto';
-    Width := 200;
+    Width         := 200;
   end;
 
   with GridCompras.Columns.Add do
   begin
-    FieldName := 'QTD';
+    FieldName     := 'QTD';
     Title.Caption := 'Quant.';
-    Width := 60;
+    Width         := 60;
   end;
 
   with GridCompras.Columns.Add do
   begin
-    FieldName := 'VL_UNIT';
+    FieldName     := 'VL_UNIT';
     Title.Caption := 'Vlr Unit.';
-    Width := 80;
+    Width         := 80;
   end;
 
   with GridCompras.Columns.Add do
   begin
-    FieldName := 'DESC_ITEM';
+    FieldName     := 'DESC_ITEM';
     Title.Caption := 'Desc.';
-    Width := 60;
+    Width         := 60;
   end;
 
   with GridCompras.Columns.Add do
   begin
-    FieldName := 'VL_TOTAL';
+    FieldName     := 'VL_TOTAL';
     Title.Caption := 'Total';
-    Width := 80;
+    Width         := 80;
   end;
 end;
 
@@ -174,7 +136,28 @@ begin
     SQL.Text := 'SELECT COALESCE(MAX(ID),0)+1 AS PROXIMO FROM COMPRAS';
     Open;
     EdNumCompra.Text := FieldByName('PROXIMO').AsString;
+
     Close;
+    SQL.Text :=
+      'INSERT INTO COMPRAS (ID, DATA, TOTAL) ' +
+      'VALUES (:ID, :DATA, :TOTAL)';
+    ParamByName('ID').AsInteger  := StrToIntDef(EdNumCompra.Text, 0);
+    ParamByName('DATA').AsDate   := DTPData.Date;
+    ParamByName('TOTAL').AsFloat := 0;
+    ExecSQL;
+  end;
+end;
+
+procedure TTelaCompras.CarregarItens;
+begin
+  with DataModule1.QryItensCompra do
+  begin
+    Close;
+    SQL.Text :=
+      'SELECT ID, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL ' +
+      'FROM ITENS_COMPRA WHERE NUM_COMPRA = :ID';
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumCompra.Text, 0);
+    Open;
   end;
 end;
 
@@ -183,16 +166,58 @@ var
   Qtd: Integer;
   VlrUnit, Desc, Total: Double;
 begin
-  Qtd := StrToIntDef(EdQuantidade.Text, 0);
+  Qtd     := StrToIntDef(EdQuantidade.Text, 0);
   VlrUnit := StrToFloatDef(EdVlrUnit.Text, 0);
-  Desc := StrToFloatDef(EdDesconto.Text, 0);
+  Desc    := StrToFloatDef(EdDesconto.Text, 0);
+
+  if Desc < 0    then Desc    := 0;
+  if VlrUnit < 0 then VlrUnit := 0;
+  if Qtd < 0     then Qtd     := 0;
 
   Total := Qtd * (VlrUnit - Desc);
+  if Total < 0 then Total := 0;
 
   EdValorTotal.Text := FormatFloat('0.00', Total);
 end;
 
+procedure TTelaCompras.EdQuantidadeChange(Sender: TObject);
+begin
+  CalcularTotalItem;
+end;
+
+procedure TTelaCompras.EdVlrUnitChange(Sender: TObject);
+begin
+  CalcularTotalItem;
+end;
+
+procedure TTelaCompras.EdDescontoChange(Sender: TObject);
+begin
+  CalcularTotalItem;
+end;
+
+procedure TTelaCompras.AtualizarTotalCompra;
+begin
+  with DataModule1.QryCompras do
+  begin
+    Close;
+    SQL.Text :=
+      'SELECT COALESCE(SUM(VL_TOTAL),0) AS TOTAL ' +
+      'FROM ITENS_COMPRA WHERE NUM_COMPRA = :ID';
+    ParamByName('ID').AsInteger := StrToIntDef(EdNumCompra.Text, 0);
+    Open;
+    EdTotalCompra.Text := FormatFloat('0.00', FieldByName('TOTAL').AsFloat);
+  end;
+end;
+
+procedure TTelaCompras.AtualizarStatusFinalizar;
+begin
+  BtnFinalizar.Enabled := (StrToFloatDef(EdTotalCompra.Text, 0) > 0);
+end;
+
 function TTelaCompras.ValidarItem: Boolean;
+var
+  Qtd: Integer;
+  Desc, VlrUnit: Double;
 begin
   Result := False;
 
@@ -202,19 +227,60 @@ begin
     Exit;
   end;
 
-  if StrToIntDef(EdQuantidade.Text, 0) <= 0 then
+  Qtd := StrToIntDef(EdQuantidade.Text, -1);
+  if Qtd <= 0 then
   begin
     ShowMessage('Quantidade deve ser maior que zero.');
     Exit;
   end;
 
-  if StrToFloatDef(EdVlrUnit.Text, 0) <= 0 then
+  VlrUnit := StrToFloatDef(EdVlrUnit.Text, -1);
+  if VlrUnit <= 0 then
   begin
     ShowMessage('Valor unitário deve ser maior que zero.');
     Exit;
   end;
 
+  Desc := StrToFloatDef(EdDesconto.Text, -1);
+  if Desc < 0 then
+  begin
+    ShowMessage('Desconto não pode ser negativo.');
+    Exit;
+  end;
+
+  if Desc > VlrUnit then
+  begin
+    ShowMessage('Desconto não pode ser maior que o valor unitário.');
+    Exit;
+  end;
+
   Result := True;
+end;
+
+procedure TTelaCompras.AumentarEstoque;
+begin
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Text :=
+      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD WHERE ID = :ID';
+    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text, 0);
+    ParamByName('ID').AsInteger  := FIDProdutoAtual;
+    ExecSQL;
+  end;
+end;
+
+procedure TTelaCompras.DevolverEstoque(Qtd: Integer; IDProduto: Integer);
+begin
+  with DataModule1.QryProdutos do
+  begin
+    Close;
+    SQL.Text :=
+      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD WHERE ID = :ID';
+    ParamByName('QTD').AsInteger := Qtd;
+    ParamByName('ID').AsInteger  := IDProduto;
+    ExecSQL;
+  end;
 end;
 
 procedure TTelaCompras.BtnAdicionarClick(Sender: TObject);
@@ -225,43 +291,27 @@ begin
     GerarNumeroCompra;
 
   CalcularTotalItem;
+  AumentarEstoque;
 
-  with CDSItens do
+  with DataModule1.QryItensCompra do
   begin
-    Append;
-    FieldByName('PRODUTO').AsString := EdProduto.Text;
-    FieldByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text,0);
-    FieldByName('VL_UNIT').AsFloat := StrToFloatDef(EdVlrUnit.Text,0);
-    FieldByName('DESC_ITEM').AsFloat := StrToFloatDef(EdDesconto.Text,0);
-    FieldByName('VL_TOTAL').AsFloat := StrToFloatDef(EdValorTotal.Text,0);
-    Post;
+    Close;
+    SQL.Text :=
+      'INSERT INTO ITENS_COMPRA (NUM_COMPRA, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL) ' +
+      'VALUES (:NUM, :PROD, :QTD, :UNIT, :DESC, :TOTAL)';
+    ParamByName('NUM').AsInteger  := StrToIntDef(EdNumCompra.Text, 0);
+    ParamByName('PROD').AsString  := EdProduto.Text;
+    ParamByName('QTD').AsInteger  := StrToIntDef(EdQuantidade.Text, 0);
+    ParamByName('UNIT').AsFloat   := StrToFloatDef(EdVlrUnit.Text, 0);
+    ParamByName('DESC').AsFloat   := StrToFloatDef(EdDesconto.Text, 0);
+    ParamByName('TOTAL').AsFloat  := StrToFloatDef(EdValorTotal.Text, 0);
+    ExecSQL;
   end;
 
+  CarregarItens;
   AtualizarTotalCompra;
   AtualizarStatusFinalizar;
   LimparCamposProduto;
-end;
-
-procedure TTelaCompras.AtualizarTotalCompra;
-var
-  Total: Double;
-begin
-  Total := 0;
-  CDSItens.First;
-  while not CDSItens.Eof do
-  begin
-    Total := Total + CDSItens.FieldByName('VL_TOTAL').AsFloat;
-    CDSItens.Next;
-  end;
-
-  EdTotalCompra.Text := FormatFloat('0.00', Total);
-end;
-
-procedure TTelaCompras.AtualizarStatusFinalizar;
-begin
-  BtnFinalizar.Enabled :=
-    (not CDSItens.IsEmpty) and
-    (StrToFloatDef(EdTotalCompra.Text,0) > 0);
 end;
 
 procedure TTelaCompras.BtnLimparClick(Sender: TObject);
@@ -276,99 +326,97 @@ begin
   EdVlrUnit.Clear;
   EdDesconto.Clear;
   EdValorTotal.Clear;
-  CodigoProduto := 0;
-  EdProduto.SetFocus;
+  FIDProdutoAtual := 0;
 end;
 
 procedure TTelaCompras.LimparTodaTela;
 begin
   EdNumCompra.Clear;
   LimparCamposProduto;
-  EdTotalCompra.Text := '0,00';
-  DTPData.Date := Date;
-
-  CDSItens.Close;
-  CDSItens.CreateDataSet;
-
+  EdTotalCompra.Text   := '0,00';
+  DTPData.Date         := Date;
   BtnFinalizar.Enabled := False;
+  FIDProdutoAtual      := 0;
+  DataModule1.QryItensCompra.Close;
 end;
 
 procedure TTelaCompras.BtnFinalizarClick(Sender: TObject);
-var
-  NumCompra: Integer;
 begin
   if not BtnFinalizar.Enabled then Exit;
 
-  NumCompra := StrToIntDef(EdNumCompra.Text,0);
-
-  try
-    with DataModule1.QryCompras do
-    begin
-      Close;
-      SQL.Text := 'INSERT INTO COMPRAS (ID, DATA, TOTAL) VALUES (:ID, :DATA, :TOTAL)';
-      ParamByName('ID').AsInteger := NumCompra;
-      ParamByName('DATA').AsDate := DTPData.Date;
-      ParamByName('TOTAL').AsFloat := StrToFloatDef(EdTotalCompra.Text,0);
-      ExecSQL;
-    end;
-
-    CDSItens.First;
-    while not CDSItens.Eof do
-    begin
-      with DataModule1.QryItensCompra do
-      begin
-        Close;
-        SQL.Text :=
-          'INSERT INTO ITENS_COMPRA ' +
-          '(NUM_COMPRA, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL) ' +
-          'VALUES (:NUM, :PROD, :QTD, :UNIT, :DESC, :TOTAL)';
-
-        ParamByName('NUM').AsInteger := NumCompra;
-        ParamByName('PROD').AsString := CDSItens.FieldByName('PRODUTO').AsString;
-        ParamByName('QTD').AsInteger := CDSItens.FieldByName('QTD').AsInteger;
-        ParamByName('UNIT').AsFloat := CDSItens.FieldByName('VL_UNIT').AsFloat;
-        ParamByName('DESC').AsFloat := CDSItens.FieldByName('DESC_ITEM').AsFloat;
-        ParamByName('TOTAL').AsFloat := CDSItens.FieldByName('VL_TOTAL').AsFloat;
-        ExecSQL;
-      end;
-
-      CDSItens.Next;
-    end;
-
-    ShowMessage('Compra finalizada com sucesso!');
-    LimparTodaTela;
-
-  except
-    on E: Exception do
-      ShowMessage('Erro ao finalizar: ' + E.Message);
+  with DataModule1.QryCompras do
+  begin
+    Close;
+    SQL.Text :=
+      'UPDATE COMPRAS SET DATA = :DATA, TOTAL = :TOTAL WHERE ID = :ID';
+    ParamByName('ID').AsInteger  := StrToIntDef(EdNumCompra.Text, 0);
+    ParamByName('DATA').AsDate   := DTPData.Date;
+    ParamByName('TOTAL').AsFloat := StrToFloatDef(EdTotalCompra.Text, 0);
+    ExecSQL;
   end;
+
+  ShowMessage('Compra finalizada com sucesso!');
+  LimparTodaTela;
 end;
 
 procedure TTelaCompras.GridComprasDblClick(Sender: TObject);
+var
+  IDItem, QtdItem, IDProduto: Integer;
 begin
-  if CDSItens.IsEmpty then Exit;
+  if DataModule1.QryItensCompra.IsEmpty then Exit;
 
   if MessageDlg('Excluir item?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
-    CDSItens.Delete;
+    IDItem  := DataModule1.QryItensCompra.FieldByName('ID').AsInteger;
+    QtdItem := DataModule1.QryItensCompra.FieldByName('QTD').AsInteger;
+
+    with DataModule1.QryProdutos do
+    begin
+      Close;
+      SQL.Text := 'SELECT ID FROM PRODUTOS WHERE DESCRICAO = :PROD';
+      ParamByName('PROD').AsString :=
+        DataModule1.QryItensCompra.FieldByName('PRODUTO').AsString;
+      Open;
+      IDProduto := FieldByName('ID').AsInteger;
+      Close;
+    end;
+
+    DevolverEstoque(QtdItem, IDProduto);
+
+    with DataModule1.QryItensCompra do
+    begin
+      Close;
+      SQL.Text := 'DELETE FROM ITENS_COMPRA WHERE ID = :ID';
+      ParamByName('ID').AsInteger := IDItem;
+      ExecSQL;
+    end;
+
+    CarregarItens;
     AtualizarTotalCompra;
     AtualizarStatusFinalizar;
   end;
 end;
 
-procedure TTelaCompras.EdQuantidadeExit(Sender: TObject);
+procedure TTelaCompras.EdProdutoKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
-  CalcularTotalItem;
-end;
+  if Key = VK_F2 then
+  begin
+    if PesqsProdutos = nil then
+      PesqsProdutos := TPesqsProdutos.Create(Application);
 
-procedure TTelaCompras.EdVlrUnitExit(Sender: TObject);
-begin
-  CalcularTotalItem;
-end;
+    if PesqsProdutos.ShowModal = mrOk then
+      if not DataModule1.QryProdutos.IsEmpty then
+      begin
+        EdProduto.Text  := DataModule1.QryProdutos.FieldByName('DESCRICAO').AsString;
+        EdVlrUnit.Text  := FormatFloat('0.00',
+          DataModule1.QryProdutos.FieldByName('VALOR_UNITARIO').AsFloat);
+        FIDProdutoAtual := DataModule1.QryProdutos.FieldByName('ID').AsInteger;
+        EdQuantidade.SetFocus;
+      end;
 
-procedure TTelaCompras.EdDescontoExit(Sender: TObject);
-begin
-  CalcularTotalItem;
+    FreeAndNil(PesqsProdutos);
+  end;
 end;
 
 procedure TTelaCompras.BloquearFocoEdit(Sender: TObject);
@@ -382,15 +430,4 @@ begin
   ActiveControl := nil;
 end;
 
-procedure TTelaCompras.EdProdutoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if Key = VK_RETURN then
-  begin
-    btnAdicionarClick(Self);
-    Key := 0;
-  end;
-end;
-
-
 end.
-

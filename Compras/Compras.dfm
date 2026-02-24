@@ -14,7 +14,6 @@ object TelaCompras: TTelaCompras
   OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object PnlFundo: TPanel
@@ -117,7 +116,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object Label1: TLabel
+    object LbInformacao: TLabel
       Left = 101
       Top = 125
       Width = 220
@@ -179,28 +178,6 @@ object TelaCompras: TTelaCompras
         TitleFont.Name = 'Tahoma'
         TitleFont.Style = [fsBold]
         OnDblClick = GridComprasDblClick
-        Columns = <
-          item
-            Expanded = False
-            Title.Caption = 'C'#243'd.'
-            Visible = True
-          end
-          item
-            Expanded = False
-            Title.Caption = 'Produto'
-            Width = 253
-            Visible = True
-          end
-          item
-            Expanded = False
-            Title.Caption = 'Quant.'
-            Visible = True
-          end
-          item
-            Expanded = False
-            Title.Caption = 'R$'
-            Visible = True
-          end>
       end
     end
     object PnlTotalCompra: TPanel
@@ -251,7 +228,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 4
-      OnExit = EdVlrUnitExit
+      OnChange = EdVlrUnitChange
     end
     object EdQuantidade: TEdit
       Left = 24
@@ -265,7 +242,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 5
-      OnExit = EdQuantidadeExit
+      OnChange = EdQuantidadeChange
     end
     object EdProduto: TEdit
       Left = 24
@@ -293,7 +270,7 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 7
-      OnExit = EdDescontoExit
+      OnChange = EdDescontoChange
     end
     object EdValorTotal: TEdit
       Left = 24
@@ -307,10 +284,11 @@ object TelaCompras: TTelaCompras
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
+      ReadOnly = True
       TabOrder = 8
       OnEnter = BloquearFocoEdit
     end
-    object BtnFinaliza: TButton
+    object BtnFinalizar: TButton
       Left = 701
       Top = 429
       Width = 169
@@ -370,6 +348,7 @@ object TelaCompras: TTelaCompras
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
+      ReadOnly = True
       TabOrder = 12
       OnEnter = BloquearFocoEdit
     end
@@ -390,7 +369,7 @@ object TelaCompras: TTelaCompras
     end
   end
   object DataSource1: TDataSource
-    DataSet = DataModule1.QryCompras
+    DataSet = DataModule1.QryItensCompra
     Left = 840
     Top = 280
   end

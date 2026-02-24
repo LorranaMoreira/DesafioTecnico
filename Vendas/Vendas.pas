@@ -37,8 +37,8 @@ type
     EdTotalVendas: TLabel;
     DTPData: TDateTimePicker;
     DSVendas: TDataSource;
-    Label1: TLabel;
-    Label2: TLabel;
+    LbInformacao: TLabel;
+    LbInformacao2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure BtnAdicionarClick(Sender: TObject);
     procedure BtnLimparClick(Sender: TObject);

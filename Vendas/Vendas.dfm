@@ -131,7 +131,7 @@ object TelaVendas: TTelaVendas
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object Label1: TLabel
+    object LbInformacao: TLabel
       Left = 346
       Top = 14
       Width = 215
@@ -144,7 +144,7 @@ object TelaVendas: TTelaVendas
       Font.Style = [fsItalic]
       ParentFont = False
     end
-    object Label2: TLabel
+    object LbInformacao2: TLabel
       Left = 101
       Top = 126
       Width = 220
