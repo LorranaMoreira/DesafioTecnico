@@ -39,6 +39,7 @@ type
     DSVendas: TDataSource;
     LbInformacao: TLabel;
     LbInformacao2: TLabel;
+    EdData: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure BtnAdicionarClick(Sender: TObject);
     procedure BtnLimparClick(Sender: TObject);
@@ -51,6 +52,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure EdQuantidadeChange(Sender: TObject);
     procedure EdDescItemChange(Sender: TObject);
+    procedure DTPDataChange(Sender: TObject);
   private
     FIDProdutoAtual: Integer;
     procedure CalcularTotalItem;
@@ -76,14 +78,11 @@ implementation
 
 uses PesqClientes, PesqProdutos;
 
-{ ================= ESTOQUE ================= }
-
 function TTelaVendas.VerificarEstoque: Boolean;
 var
   EstoqueAtual, QtdSolicitada: Integer;
 begin
   Result := False;
-
   QtdSolicitada := StrToIntDef(EdQuantidade.Text, 0);
 
   if FIDProdutoAtual <= 0 then
@@ -124,8 +123,7 @@ begin
   with DataModule1.QryProdutos do
   begin
     Close;
-    SQL.Text :=
-      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD WHERE ID = :ID';
+    SQL.Text := 'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD WHERE ID = :ID';
     ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text, 0);
     ParamByName('ID').AsInteger  := FIDProdutoAtual;
     ExecSQL;
@@ -137,19 +135,25 @@ begin
   with DataModule1.QryProdutos do
   begin
     Close;
-    SQL.Text :=
-      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD WHERE ID = :ID';
+    SQL.Text := 'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD WHERE ID = :ID';
     ParamByName('QTD').AsInteger := Qtd;
     ParamByName('ID').AsInteger  := IDProduto;
     ExecSQL;
   end;
 end;
 
-{ ================= FORM ================= }
-
 procedure TTelaVendas.FormCreate(Sender: TObject);
 begin
+  DTPData.Visible      := False;
   DTPData.Date         := Date;
+
+  EdData.Text          := FormatDateTime('dd/mm/yyyy', DTPData.Date);
+  EdData.ReadOnly      := True;
+  EdData.TabStop       := False;
+  EdData.Color         := clBtnFace;
+  EdData.Cursor        := crDefault;
+  EdData.Enabled       := False;
+
   EdTotalVenda.Text    := '0,00';
   BtnFinalizar.Enabled := False;
   FIDProdutoAtual      := 0;
@@ -158,6 +162,11 @@ begin
   GridVendas.DataSource := DSVendas;
 
   ConfigurarGrid;
+end;
+
+procedure TTelaVendas.DTPDataChange(Sender: TObject);
+begin
+  EdData.Text := FormatDateTime('dd/mm/yyyy', DTPData.Date);
 end;
 
 procedure TTelaVendas.LimparTela;
@@ -171,6 +180,7 @@ begin
   EdVlrTotalItem.Clear;
   EdTotalVenda.Text    := '0,00';
   DTPData.Date         := Date;
+  EdData.Text          := FormatDateTime('dd/mm/yyyy', DTPData.Date);
   BtnFinalizar.Enabled := False;
   FIDProdutoAtual      := 0;
 

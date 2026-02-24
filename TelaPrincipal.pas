@@ -28,9 +28,7 @@ type
     procedure BtnRelatVendasClick(Sender: TObject);
     procedure BtnRelatComprasClick(Sender: TObject);
   private
-    { Private declarations }
   public
-    { Public declarations }
   end;
 
 var
@@ -42,71 +40,71 @@ implementation
 
 procedure TPrincipal.BtnProdutosClick(Sender: TObject);
 begin
-  CadProdutos := TCadProdutos.Create(Self);
+  CadProdutos := TCadProdutos.Create(Application);
   try
     CadProdutos.ShowModal;
   finally
-    CadProdutos.Free;
+    FreeAndNil(CadProdutos);
   end;
 end;
 
 procedure TPrincipal.BtnClientesClick(Sender: TObject);
 begin
-  CadCliente := TCadCliente.Create(Self);
+  CadCliente := TCadCliente.Create(Application);
   try
     CadCliente.ShowModal;
   finally
-    CadCliente.Free;
+    FreeAndNil(CadCliente);
   end;
 end;
 
 procedure TPrincipal.BtnCepClick(Sender: TObject);
 begin
-  CadastroCep := TCadastroCep.Create(Self);
+  CadastroCep := TCadastroCep.Create(Application);
   try
     CadastroCep.ShowModal;
   finally
-    CadastroCep.Free;
+    FreeAndNil(CadastroCep);
   end;
 end;
 
 procedure TPrincipal.BtnVendasClick(Sender: TObject);
 begin
-  TelaVendas := TTelaVendas.Create(Self);
+  TelaVendas := TTelaVendas.Create(Application);
   try
     TelaVendas.ShowModal;
   finally
-    TelaVendas.Free;
+    FreeAndNil(TelaVendas);
   end;
 end;
 
 procedure TPrincipal.BtnComprasClick(Sender: TObject);
 begin
-  TelaCompras := TTelaCompras.Create(Self);
+  TelaCompras := TTelaCompras.Create(Application);
   try
     TelaCompras.ShowModal;
   finally
-    TelaCompras.Free;
+    FreeAndNil(TelaCompras);
   end;
 end;
 
 procedure TPrincipal.BtnRelatVendasClick(Sender: TObject);
 begin
-  RelatVendas := TRelatVendas.Create(Self);
+  RelatVendas := TRelatVendas.Create(Application);
   try
     RelatVendas.ShowModal;
   finally
-    RelatVendas.Free;
+    FreeAndNil(RelatVendas);
   end;
 end;
 
 procedure TPrincipal.BtnRelatComprasClick(Sender: TObject);
 begin
-  RelatCompras := TRelatCompras.Create(Self);
+  RelatCompras := TRelatCompras.Create(Application);
   try
     RelatCompras.ShowModal;
   finally
-    RelatCompras.Free;
+    FreeAndNil(RelatCompras);
   end;
 end;
 

@@ -1,5 +1,5 @@
 unit Compras;
-
+
 interface
 
 uses
@@ -37,6 +37,7 @@ type
     DTPData: TDateTimePicker;
     DataSource1: TDataSource;
     LbInformacao: TLabel;
+    EdData: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure BtnAdicionarClick(Sender: TObject);
     procedure BtnLimparClick(Sender: TObject);
@@ -49,6 +50,7 @@ type
     procedure BloquearFocoEdit(Sender: TObject);
     procedure BloquearCliqueEdit(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure DTPDataChange(Sender: TObject);
   private
     FIDProdutoAtual: Integer;
     procedure ConfigurarGrid;
@@ -76,16 +78,30 @@ uses PesqProdutos;
 
 procedure TTelaCompras.FormCreate(Sender: TObject);
 begin
+  DTPData.Visible      := False;
   DTPData.Date         := Date;
+
+  EdData.Text          := FormatDateTime('dd/mm/yyyy', DTPData.Date);
+  EdData.ReadOnly      := True;
+  EdData.TabStop       := False;
+  EdData.Color         := clBtnFace;
+  EdData.Cursor        := crDefault;
+  EdData.Enabled       := False;
+
   EdTotalCompra.Text   := '0,00';
   EdNumCompra.Text     := '';
   BtnFinalizar.Enabled := False;
   FIDProdutoAtual      := 0;
 
-  DataSource1.DataSet      := DataModule1.QryItensCompra;
-  GridCompras.DataSource   := DataSource1;
+  DataSource1.DataSet    := DataModule1.QryItensCompra;
+  GridCompras.DataSource := DataSource1;
 
   ConfigurarGrid;
+end;
+
+procedure TTelaCompras.DTPDataChange(Sender: TObject);
+begin
+  EdData.Text := FormatDateTime('dd/mm/yyyy', DTPData.Date);
 end;
 
 procedure TTelaCompras.ConfigurarGrid;
@@ -262,8 +278,7 @@ begin
   with DataModule1.QryProdutos do
   begin
     Close;
-    SQL.Text :=
-      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD WHERE ID = :ID';
+    SQL.Text := 'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE + :QTD WHERE ID = :ID';
     ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text, 0);
     ParamByName('ID').AsInteger  := FIDProdutoAtual;
     ExecSQL;
@@ -275,8 +290,7 @@ begin
   with DataModule1.QryProdutos do
   begin
     Close;
-    SQL.Text :=
-      'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD WHERE ID = :ID';
+    SQL.Text := 'UPDATE PRODUTOS SET ESTOQUE = ESTOQUE - :QTD WHERE ID = :ID';
     ParamByName('QTD').AsInteger := Qtd;
     ParamByName('ID').AsInteger  := IDProduto;
     ExecSQL;
@@ -299,12 +313,12 @@ begin
     SQL.Text :=
       'INSERT INTO ITENS_COMPRA (NUM_COMPRA, PRODUTO, QTD, VL_UNIT, DESC_ITEM, VL_TOTAL) ' +
       'VALUES (:NUM, :PROD, :QTD, :UNIT, :DESC, :TOTAL)';
-    ParamByName('NUM').AsInteger  := StrToIntDef(EdNumCompra.Text, 0);
-    ParamByName('PROD').AsString  := EdProduto.Text;
-    ParamByName('QTD').AsInteger  := StrToIntDef(EdQuantidade.Text, 0);
-    ParamByName('UNIT').AsFloat   := StrToFloatDef(EdVlrUnit.Text, 0);
-    ParamByName('DESC').AsFloat   := StrToFloatDef(EdDesconto.Text, 0);
-    ParamByName('TOTAL').AsFloat  := StrToFloatDef(EdValorTotal.Text, 0);
+    ParamByName('NUM').AsInteger := StrToIntDef(EdNumCompra.Text, 0);
+    ParamByName('PROD').AsString := EdProduto.Text;
+    ParamByName('QTD').AsInteger := StrToIntDef(EdQuantidade.Text, 0);
+    ParamByName('UNIT').AsFloat  := StrToFloatDef(EdVlrUnit.Text, 0);
+    ParamByName('DESC').AsFloat  := StrToFloatDef(EdDesconto.Text, 0);
+    ParamByName('TOTAL').AsFloat := StrToFloatDef(EdValorTotal.Text, 0);
     ExecSQL;
   end;
 
@@ -335,6 +349,7 @@ begin
   LimparCamposProduto;
   EdTotalCompra.Text   := '0,00';
   DTPData.Date         := Date;
+  EdData.Text          := FormatDateTime('dd/mm/yyyy', DTPData.Date);
   BtnFinalizar.Enabled := False;
   FIDProdutoAtual      := 0;
   DataModule1.QryItensCompra.Close;
@@ -431,3 +446,4 @@ begin
 end;
 
 end.
+

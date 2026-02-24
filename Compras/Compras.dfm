@@ -25,7 +25,7 @@ object TelaCompras: TTelaCompras
     Color = clInactiveCaption
     ParentBackground = False
     TabOrder = 0
-    object EbData: TLabel
+    object LbData: TLabel
       Left = 16
       Top = 10
       Width = 45
@@ -366,6 +366,21 @@ object TelaCompras: TTelaCompras
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 13
+      Visible = False
+      OnChange = DTPDataChange
+    end
+    object EdData: TEdit
+      Left = 16
+      Top = 35
+      Width = 137
+      Height = 26
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 14
     end
   end
   object DataSource1: TDataSource

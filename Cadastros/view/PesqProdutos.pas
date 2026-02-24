@@ -1,5 +1,5 @@
 unit PesqProdutos;
-
+
 interface
 
 uses
@@ -21,6 +21,7 @@ type
   private
     FCadOrigem: TForm;
     procedure PreencherCadastro;
+    procedure ConfigurarGrid;
   public
     property CadOrigem: TForm write FCadOrigem;
   end;
@@ -33,6 +34,46 @@ implementation
 uses CadsProdutos;
 
 {$R *.dfm}
+
+procedure TPesqsProdutos.ConfigurarGrid;
+begin
+  GridProdutos.Columns.Clear;
+
+  with GridProdutos.Columns.Add do
+  begin
+    FieldName     := 'ID';
+    Title.Caption := 'Cód.';
+    Width         := 50;
+  end;
+
+  with GridProdutos.Columns.Add do
+  begin
+    FieldName     := 'DESCRICAO';
+    Title.Caption := 'Descrição';
+    Width         := 200;
+  end;
+
+  with GridProdutos.Columns.Add do
+  begin
+    FieldName     := 'MARCA';
+    Title.Caption := 'Marca';
+    Width         := 100;
+  end;
+
+  with GridProdutos.Columns.Add do
+  begin
+    FieldName     := 'ESTOQUE';
+    Title.Caption := 'Estoque';
+    Width         := 70;
+  end;
+
+  with GridProdutos.Columns.Add do
+  begin
+    FieldName     := 'VALOR_UNITARIO';
+    Title.Caption := 'Vlr Unit.';
+    Width         := 80;
+  end;
+end;
 
 procedure TPesqsProdutos.FormShow(Sender: TObject);
 begin
@@ -48,6 +89,8 @@ begin
       'FROM PRODUTOS ORDER BY DESCRICAO';
     Open;
   end;
+
+  ConfigurarGrid;
 end;
 
 procedure TPesqsProdutos.PreencherCadastro;
@@ -73,7 +116,6 @@ begin
     DataModule1.QryProdutos.FieldByName('VALOR_UNITARIO').AsFloat);
 
   Cad.ImgFoto.Picture := nil;
-
   Blob := DataModule1.QryProdutos.FieldByName('FOTO') as TBlobField;
   if (Blob <> nil) and (not Blob.IsNull) then
   begin
@@ -109,7 +151,9 @@ begin
   GridProdutos.DataSource := nil;
   DataSource1.DataSet     := nil;
   DataModule1.QryProdutos.Close;
-  Action := caHide;
+  Action          := caFree;
+  PesqsProdutos   := nil;
 end;
 
 end.
+

@@ -421,6 +421,21 @@ object TelaVendas: TTelaVendas
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 14
+      Visible = False
+      OnChange = DTPDataChange
+    end
+    object EdData: TEdit
+      Left = 16
+      Top = 35
+      Width = 137
+      Height = 26
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 15
     end
   end
   object DSVendas: TDataSource
